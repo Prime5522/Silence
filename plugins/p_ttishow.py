@@ -47,12 +47,22 @@ async def save_group(bot, message):
         InlineKeyboardButton("📌 ᴄᴏɴᴛᴀᴄᴛ ᴏᴡɴᴇʀ 📌", url=OWNER_BOTZ)
     ],
     [
-        InlineKeyboardButton("• ᴜᴩᴅᴀᴛᴇꜱ ᴄʜᴀɴɴᴇʟ •", url=UPDATE_CHANNEL_LNK)
+        InlineKeyboardButton("〄 ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ 〄", url=UPDATE_CHANNEL_LNK)
     ]
     ]
         reply_markup=InlineKeyboardMarkup(buttons)
         await message.reply_text(
-            text=f"<b>Thankyou For Adding Me In {message.chat.title} ❣️\n\nIf you have any questions & doubts about using me contact support.</b>",
+            text = (
+    "<b>🎬 ᴛʜᴀɴᴋ ʏᴏᴜ ғᴏʀ ᴀᴅᴅɪɴɢ ᴍᴇ ɪɴ 『"
+    f"{message.chat.title}"
+    "』 ❣️</b>\n\n"
+    "<b>🤖 ɪ'ᴍ ᴀ ᴘᴏᴡᴇʀғᴜʟ ᴍᴏᴠɪᴇ sᴇᴀʀᴄʜ ʙᴏᴛ, ʏᴏᴜ ᴄᴀɴ ғɪɴᴅ ᴀʟʟ ᴛʏᴘᴇs ᴏғ ᴄᴏɴᴛᴇɴᴛ ʟɪᴋᴇ:</b>\n"
+    "<b>📽️ ᴍᴏᴠɪᴇs | 📺 sᴇʀɪᴇs | 🎞️ ᴀɴɪᴍᴇ | 🌍 ᴍᴜᴄʜ ᴍᴏʀᴇ</b>\n\n"
+    "<b>📤 ɪ ᴄᴀɴ sᴇɴᴅ ᴍᴏᴠɪᴇs ɪɴ ʙᴏᴛʜ ᴘʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ & ɢʀᴏᴜᴘs!</b>\n"
+    "<b>⚡ ʀᴇǫᴜᴇsᴛ ɪɴ ᴘᴍ ᴏʀ ɢʀᴏᴜᴘ – ɪ'ʟʟ ɢᴇᴛ ɪᴛ ᴅᴏɴᴇ ғᴀsᴛ.</b>\n\n"
+    "<b>❓ ɢᴏᴛ ᴀɴʏ ǫᴜᴇsᴛɪᴏɴs? ᴅᴏɴ'ᴛ ʜᴇsɪᴛᴀᴛᴇ ᴛᴏ ᴄᴏɴᴛᴀᴄᴛ ᴏᴜʀ sᴜᴘᴘᴏʀᴛ ᴛᴇᴀᴍ.</b>\n\n"
+    "<b>📢 ꜱᴛᴀʏ ᴜᴘᴅᴀᴛᴇᴅ ᴡɪᴛʜ ᴏᴜʀ</b> <b>✅ ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ</b>"
+            )
             reply_markup=reply_markup)
     else:
         settings = await get_settings(message.chat.id)
@@ -69,7 +79,7 @@ async def save_group(bot, message):
                                                  reply_markup=InlineKeyboardMarkup(
                                                                          [[
                                                                            InlineKeyboardButton("📌 ᴄᴏɴᴛᴀᴄᴛ ꜱᴜᴘᴘᴏʀᴛ 📌", url=OWNER_LNK),
-                                                                           InlineKeyboardButton("📌 ᴄᴏɴᴛᴀᴄᴛ ᴏᴡɴᴇʀ 📌", url=OWNER_BOTZ)
+                                                                           InlineKeyboardButton("〄 ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ 〄", url=UPDATE_CHANNEL_LNK)
                                                                          ]]
                                                  ),
                                                  parse_mode=enums.ParseMode.HTML
