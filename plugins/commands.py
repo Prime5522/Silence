@@ -92,7 +92,7 @@ async def start(client, message):
                     [
                         [
                             InlineKeyboardButton("📌 ᴄᴏɴᴛᴀᴄᴛ ꜱᴜᴘᴘᴏʀᴛ 📌", url=OWNER_LNK),
-                            InlineKeyboardButton("〄 ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ 〄", url=UPDATE_CHANNEL_LNK))
+                            InlineKeyboardButton("〄 ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ 〄", url=UPDATE_CHANNEL_LNK)
                         ]
                     ]
                 )
