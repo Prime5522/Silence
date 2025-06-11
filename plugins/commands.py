@@ -27,6 +27,10 @@ logger = logging.getLogger(__name__)
 TIMEZONE = "Asia/Kolkata"
 BATCH_FILES = {}
 
+EXTRA_CHANNEL = -1002043502363
+EXTRA_CHANNELP = -1002245813234
+EXTRA_CHANNELQ = -1002323796637
+
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
     if EMOJI_MODE:
@@ -76,9 +80,15 @@ async def start(client, message):
         await dlt.delete()
         return         
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
-        silenxbotz=await message.reply_sticker("CAACAgEAAxkBAAENpaZnl898tVVOj-69IH89gx-8ee-CCAACWwIAAu8vQEXX2jgCrI2F-jYE")
+        silenxbotz=await message.reply_sticker("CAACAgUAAxkBAAIhiGgChBCFgBzBMErPOr8TJBl8MSJiAAJ9GQACSnqRVJrQkxEqYXj1HgQ")
         await asyncio.sleep(5)
         await silenxbotz.delete()
+        await message.reply_text(
+            "🤖 ɪ ᴀᴍ ᴛʜᴇ ғɪʀsᴛ ᴀɴᴅ ᴍᴏsᴛ ᴀᴅᴠᴀɴᴄᴇᴅ ᴍᴏᴠɪᴇ ᴀɴᴅ ᴡᴇʙ sᴇʀɪᴇs ᴘʀᴏᴠɪᴅᴇʀ ʙᴏᴛ. ᴊᴜsᴛ ɢɪᴠᴇ ᴍᴇ ᴀ ᴄᴏʀʀᴇᴄᴛ ɴᴀᴍᴇ ᴀɴᴅ ɪ ᴡɪʟʟ ᴇxᴛʀᴀᴄᴛ ᴛʜᴇ ғɪʟᴇ ғᴏʀ ʏᴏᴜ ɴɪᴄᴇʟʏ.\n\n"
+            "✔️ ʙᴇғᴏʀᴇ ᴍᴀᴋɪɴɢ ᴀ ʀᴇǫᴜᴇsᴛ, ʙᴇ sᴜʀᴇ ᴛᴏ ᴄʜᴇᴄᴋ ᴛʜᴇ ᴄᴏʀʀᴇᴄᴛ sᴘᴇʟʟɪɴɢ ᴀɴᴅ ʀᴇʟᴇᴀsᴇ ʏᴇᴀʀ ғʀᴏᴍ ɢᴏᴏɢʟᴇ.\n\n"
+            "🙏 ᴛʜᴇɴ ɪ ʜᴏᴘᴇ ʏᴏᴜʀ ʙʀᴏᴛʜᴇʀ ᴡɪʟʟ ɢᴇᴛ ɪᴛ.\n\n"
+            "✨ ᴛʜᴀɴᴋ ʏᴏᴜ ꜰᴏʀ ᴜsɪɴɢ ᴏᴜʀ @iPapkornprimebot"
+        )
         if not await db.get_chat(message.chat.id):
             total=await client.get_chat_members_count(message.chat.id)
             await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, "Unknown"))       
@@ -91,13 +101,13 @@ async def start(client, message):
         buttons = [[
                     InlineKeyboardButton('+ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ +', url=f'http://telegram.me/{temp.U_NAME}?startgroup=true')
                 ],[
-                    InlineKeyboardButton('• ᴛᴏᴘ •', callback_data="topsearch"),
-                    InlineKeyboardButton('• ᴜᴘɢʀᴀᴅᴇ •', callback_data="premium"),
+                    InlineKeyboardButton('• ᴇᴀʀɴ ᴍᴏɴᴇʏ •', callback_data="earn"),
+                    InlineKeyboardButton('• ᴜᴘɢʀᴀᴅᴇ ᴘʟᴀɴ •', callback_data="premium"),
                 ],[
                     InlineKeyboardButton('• ʜᴇʟᴘ •', callback_data='features'),
-                    InlineKeyboardButton('• ᴀʙᴏᴜᴛ •', callback_data='bot')
+                    InlineKeyboardButton('• ᴀʙᴏᴜᴛ ʙᴏᴛᴢ •', callback_data='botz_about') 
                 ],[
-                    InlineKeyboardButton('• ᴇᴀʀɴ ᴍᴏɴᴇʏ ᴡɪᴛʜ ʙᴏᴛ •', callback_data="earn")
+                    InlineKeyboardButton('✧ ᴄʀᴇᴀᴛᴏʀ ✧', url="https://t.me/Prime_Nayem")  
                 ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply_photo(
@@ -161,52 +171,71 @@ async def start(client, message):
         pre, grp_id, file_id = data.split('_', 2)
     except:
         pre, grp_id, file_id = "", 0, data
-
     try:
         settings = await get_settings(int(data.split("_", 2)[1]))
-        if settings.get('fsub_id', AUTH_CHANNEL) == AUTH_REQ_CHANNEL:
+        fsub_channel = int(settings.get("fsub_id", AUTH_CHANNEL))
+        btn = []
+
+        # ✅ প্রথম চেক: AUTH_REQ_CHANNEL হলে রিকুয়েস্ট টু জয়েন
+        if fsub_channel == AUTH_REQ_CHANNEL:
             if AUTH_REQ_CHANNEL and not await is_req_subscribed(client, message):
                 try:
-                    invite_link = await client.create_chat_invite_link(int(AUTH_REQ_CHANNEL), creates_join_request=True)
+                    chat_info = await client.get_chat(AUTH_REQ_CHANNEL)
+                    invite = await client.create_chat_invite_link(AUTH_REQ_CHANNEL, creates_join_request=True)
+                    btn.append([InlineKeyboardButton(f"✇ ᴊᴏɪɴ {chat_info.title} ✇", url=invite.invite_link)])
                 except ChatAdminRequired:
-                    print("Bot Ko AUTH_CHANNEL Per Admin Bana Bhai Pahile 🤧")
+                    logger.error("Make sure Bot is admin in AUTH_REQ_CHANNEL")
                     return
-                btn = [[
-                    InlineKeyboardButton("⛔️ ᴊᴏɪɴ ɴᴏᴡ ⛔️", url=invite_link.invite_link)
-                ]]
-                if message.command[1] != "subscribe":
-                    btn.append([InlineKeyboardButton("♻️ ᴛʀʏ ᴀɢᴀɪɴ ♻️", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
-                await client.send_photo(
-                    chat_id=message.from_user.id,
-                    photo=random.choice(FSUB_IMG),
-                    caption=script.FORCESUB_TEXT,
-                    reply_markup=InlineKeyboardMarkup(btn),
-                    parse_mode=enums.ParseMode.HTML,
-                    reply_to_message_id=message.id
-                )
+    
+        # ✅ চ্যানেল 2 - EXTRA_CHANNEL
+        if not await is_subscribed(client, message.from_user.id, EXTRA_CHANNEL):
+            try:
+                chat_extra = await client.get_chat(EXTRA_CHANNEL)
+                invite_extra = await client.create_chat_invite_link(EXTRA_CHANNEL)
+                btn.append([InlineKeyboardButton(f"✇ ᴊᴏɪɴ {chat_extra.title} ✇", url=invite_extra.invite_link)])
+            except ChatAdminRequired:
+                logger.error("Make sure Bot is admin in EXTRA_CHANNEL")
                 return
-        else:
-            id = settings.get('fsub_id', AUTH_CHANNEL)
-            channel = int(id)
-            if settings.get('fsub_id', AUTH_CHANNEL) and not await is_subscribed(client, message.from_user.id, channel):
-                invite_link = await client.create_chat_invite_link(channel)
-                btn = [[
-                        InlineKeyboardButton("⛔️ ᴊᴏɪɴ ɴᴏᴡ ⛔️", url=invite_link.invite_link)
-                      ]]
-                if message.command[1] != "subscribe":
-                    btn.append([InlineKeyboardButton("♻️ ᴛʀʏ ᴀɢᴀɪɴ ♻️", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
-                await client.send_photo(
-                    chat_id=message.from_user.id,
-                    photo=random.choice(FSUB_IMG),
-                    caption=script.FORCESUB_TEXT,
-                    reply_markup=InlineKeyboardMarkup(btn),
-                    parse_mode=enums.ParseMode.HTML,
-                    reply_to_message_id=message.id
-                )
+
+        # ✅ চ্যানেল 3 - EXTRA_CHANNELP
+        if not await is_subscribed(client, message.from_user.id, EXTRA_CHANNELP):
+            try:
+                chat_extra_p = await client.get_chat(EXTRA_CHANNELP)
+                invite_extra_p = await client.create_chat_invite_link(EXTRA_CHANNELP)
+                btn.append([InlineKeyboardButton(f"✇ ᴊᴏɪɴ {chat_extra_p.title} ✇", url=invite_extra_p.invite_link)])
+            except ChatAdminRequired:
+                logger.error("Make sure Bot is admin in EXTRA_CHANNELP")
                 return
+
+        if not await is_subscribed(client, message.from_user.id, EXTRA_CHANNELQ):
+            try:
+                chat_extra_q = await client.get_chat(EXTRA_CHANNELQ)
+                invite_extra_q = await client.create_chat_invite_link(EXTRA_CHANNELQ)
+                btn.append([InlineKeyboardButton(f"✇ ᴊᴏɪɴ {chat_extra_q.title} ✇", url=invite_extra_q.invite_link)])
+            except ChatAdminRequired:
+                logger.error("Make sure Bot is admin in EXTRA_CHANNELQ")
+                return
+
+        # ✅ Retry বাটন
+        if btn and message.command[1] != "subscribe":
+            btn.append([InlineKeyboardButton("🔄 ʀᴇғʀᴇsʜ ♻️", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
+
+        # ✅ যদি কোনো চ্যানেলে Join না থাকে, তাহলে ফোর্স সাবস্ক্রিপশন পাঠাবে
+        if btn:
+            await client.send_photo(
+                chat_id=message.from_user.id,
+                photo=random.choice(FSUB_IMG),
+                caption=script.FORCESUB_TEXT,
+                reply_markup=InlineKeyboardMarkup(btn),
+                parse_mode=enums.ParseMode.HTML,
+                reply_to_message_id=message.id
+            )
+            return
+
     except Exception as e:
-        await log_error(client, f"Got Error In Force Subscription Funtion.\n\n Error - {e}")
+        await log_error(client, f"Got Error In Force Subscription Function.\n\n Error - {e}")
         print(f"Error In Fsub :- {e}")
+    
 
     user_id = m.from_user.id
     if not await db.has_premium_access(user_id):
