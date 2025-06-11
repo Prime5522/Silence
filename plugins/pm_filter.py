@@ -1883,7 +1883,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     
 async def auto_filter(client, msg, spoll=False):
-    bd_timee = message.date + timedelta(hours=6)
+    curr_time = datetime.utcnow() + timedelta(hours=6)  # ⏰ ৬ ঘণ্টা এগিয়ে — BD Time
 
     if not spoll:
         message = msg
@@ -1943,7 +1943,7 @@ async def auto_filter(client, msg, spoll=False):
     f"🎬 **ꜰɪʟᴇ ɴᴀᴍᴇ:** `{search}`\n"
     f"🆔 **ᴜsᴇʀ ɪᴅ:** [ᴠɪᴇᴡ ᴩʀᴏꜰɪʟᴇ](tg://openmessage?user_id={message.from_user.id})\n"
     f"👤 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:** `{message.from_user.first_name}`\n"
-    f"⏰ **ʀᴇǫᴜᴇsᴛᴇᴅ ᴏɴ:** <code>{bd_timee.strftime('%Y-%m-%d %I:%M:%S %p')} (BST)</code>\n"
+    f"⏰ **ʀᴇǫᴜᴇsᴛᴇᴅ ᴏɴ:** `{curr_time.strftime('%d %B %Y, %I:%M %p')}`\n"
     f"💌 **sᴛᴀᴛᴜs:** ᴩᴇɴᴅɪɴɢ 🔄\n", 
     reply_markup = InlineKeyboardMarkup([
     # ✅ বড় বোতাম - Uploaded Done
