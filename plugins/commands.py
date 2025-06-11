@@ -98,8 +98,19 @@ async def start(client, message):
                 )
             )
             if not await db.get_chat(message.chat.id):
-                total=await client.get_chat_members_count(message.chat.id)
-                await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, "Unknown"))       
+                grp_members = await client.get_chat_members_count(message.chat.id)
+                adder_name = message.from_user.mention if message.from_user else "Unknown"
+                current_time = (datetime.utcnow() + timedelta(hours=6)).strftime("%d-%m-%Y %I:%M %p")
+                grp_link = f"<a href='https://t.me/c/{str(message.chat.id)[4:]}'>{message.chat.title}</a>"
+
+                log_text = f"<b>🚀 Group Joined (Secondary Log)</b>\n\n" \
+                           f"<b>🏷 Group:</b> {grp_link}\n" \
+                           f"<b>🆔 Group ID:</b> <code>{message.chat.id}</code>\n" \
+                           f"<b>👥 Total Members:</b> {grp_members}\n" \
+                           f"<b>➕ Added By:</b> {adder_name}\n" \
+                           f"<b>🕰 Joined At:</b> {current_time}"
+
+                await client.send_message(LOG_CHANNEL, log_text, parse_mode="HTML", disable_web_page_preview=True)
                 await db.add_chat(message.chat.id, message.chat.title)
             return
     if not await db.is_user_exist(message.from_user.id):
