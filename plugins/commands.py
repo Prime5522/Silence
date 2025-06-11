@@ -9,7 +9,7 @@ import time
 import pytz
 from .pm_filter import auto_filter 
 from Script import script
-from datetime import datetime
+from datetime import datetime, timedelta
 from database.refer import referdb
 from database.topdb import silentdb
 from pyrogram.enums import ParseMode, ChatType
@@ -261,6 +261,8 @@ async def start(client, message):
                     InlineKeyboardButton(text="♻️ ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ᴠᴇʀɪꜰʏ ♻️", url=verify)
                 ],[
                     InlineKeyboardButton(text="⁉️ ʜᴏᴡ ᴛᴏ ᴠᴇʀɪꜰʏ ⁉️", url=howtodownload)
+                ],[
+                    InlineKeyboardButton(text="💎 ᴜᴩɢʀᴀᴅᴇ ᴛᴏ ᴩʀᴇᴍɪᴜᴍ 💎", callback_data="premium2")
                 ]]
                 reply_markup=InlineKeyboardMarkup(buttons)
                 if await db.user_verified(user_id): 
@@ -280,7 +282,7 @@ async def start(client, message):
         except Exception as e:
             await log_error(client, f"Got Error In Verification Funtion.\n\n Error - {e}")
             print(f"Error In Verification - {e}")
-            await message.reply_text(f"Something Want Wrong ! Message Here - @SilentXBotz_Support")
+            await message.reply_text(f"Something Want Wrong ! Message Here - @Prime_Botz_Support")
 
     if data.split("-", 1)[0] == "BATCH":
         sts = await message.reply("<b>Please wait...</b>")
@@ -1159,6 +1161,33 @@ async def reset_group_command(client, message):
     await save_group_settings(grp_id, 'is_verify', IS_VERIFY)
     await save_group_settings(grp_id, 'fsub_id', AUTH_CHANNEL)
     await message.reply_text('ꜱᴜᴄᴄᴇꜱꜱғᴜʟʟʏ ʀᴇꜱᴇᴛ ɢʀᴏᴜᴘ ꜱᴇᴛᴛɪɴɢꜱ...')
+
+    # ✅ LOG_CHANNEL-এ বাংলাদেশ টাইম সহ রিপোর্ট পাঠানো
+    try:
+
+        user = message.from_user
+        bd_time = message.date + timedelta(hours=6)  # 🇧🇩 BST Time (UTC+6)
+        group_title = message.chat.title or "Private Group"
+        group_link = f"<a href='https://t.me/c/{str(grp_id)[4:]}/1'>{group_title}</a>" if str(grp_id).startswith("-100") else group_title
+
+        log_text = (
+            f"🔄 <b>Group Settings Reset</b>\n\n"
+            f"👤 <b>By:</b> <a href='tg://user?id={user.id}'>{user.mention}</a>\n"
+            f"💬 <b>Group:</b> {group_link}\n"
+            f"🆔 <b>Group ID:</b> <code>{grp_id}</code>\n"
+            f"🕒 <b>Time:</b> <code>{bd_time.strftime('%Y-%m-%d %I:%M:%S %p')} (BST)</code>\n\n"
+            f"✅ <i>All settings have been reset to default.</i>"
+        )
+
+        await client.send_message(
+            LOG_CHANNEL,
+            log_text,
+            parse_mode=enums.ParseMode.HTML,
+            disable_web_page_preview=True
+        )
+
+    except Exception as e:
+        print(f"Error logging reset_group: {e}")
 
 @Client.on_message(filters.command('set_fsub'))
 async def set_fsub(client, message):
