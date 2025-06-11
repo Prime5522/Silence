@@ -40,6 +40,9 @@ import requests
 import string
 import tracemalloc
 
+import os
+req_channel = int(os.environ.get('REQ_CHANNEL', -1002120012639))
+
 tracemalloc.start()
 
 TIMEZONE = "Asia/Kolkata"
@@ -94,12 +97,16 @@ async def pm_text(bot, message):
             if gfilter == False:
                 await auto_filter(bot, message)
         else:
-            await message.reply_text(
-             text=f"<b><i>ɪ ᴀᴍ ɴᴏᴛ ᴡᴏʀᴋɪɴɢ ʜᴇʀᴇ 🚫 ᴊᴏɪɴ ᴍʏ ɢʀᴏᴜᴘ ꜰʀᴏᴍ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ ᴀɴᴅ ꜱᴇᴀʀᴄʜ ᴛʜᴇʀᴇ !</i></b>",   
-             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📝 ꜱᴇᴀʀᴄʜʜᴇʀᴇ ", url=GRP_LNK)]])
+            await message.reply_photo(
+                photo="https://i.postimg.cc/XXMZ8kvs/file-000000001c6861f88a586629fa554677-conversation-id-681d5240-27b8-800e-a7f8-f4268a53fe3c-message-i.png",  # Replace with your image URL or local path
+                caption=f"<b><i>ɪ ᴀᴍ ɴᴏᴛ ᴡᴏʀᴋɪɴɢ ʜᴇʀᴇ ꜰᴏʀ sᴏᴍᴇ ʀᴇᴀsᴏɴs 🚫 ᴊᴏɪɴ ᴍʏ ɢʀᴏᴜᴘ ꜰʀᴏᴍ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ ᴀɴᴅ ꜱᴇᴀʀᴄʜ ᴛʜᴇʀᴇ !👇</i></b>",
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("📝 ꜱᴇᴀʀᴄʜ ʜᴇʀᴇ 🔎", url=GRP_LNK)]]
+                )
             )
     except Exception as e:
         print(f"An error occurred: {str(e)}")
+
 
 
 @Client.on_callback_query(filters.regex(r"^reffff"))
@@ -743,12 +750,185 @@ async def advantage_spoll_choker(bot, query):
                 if NO_RESULTS_MSG:
                     await bot.send_message(chat_id=LOG_CHANNEL, text=(script.NORSLTS.format(reqstr.id, reqstr.mention, movie)))               
                 contact_admin_button = InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("🔰Cʟɪᴄᴋ ʜᴇʀᴇ & ʀᴇǫᴜᴇsᴛ ᴛᴏ ᴀᴅᴍɪɴ🔰", url=OWNER_LNK)]]
+                    [[InlineKeyboardButton("🔰Cʟɪᴄᴋ ʜᴇʀᴇ & ʀᴇǫᴜᴇsᴛ ᴛᴏ ᴀᴅᴍɪɴ🔰", url=OWNER_BOTZ)]]
                 )               
                 k = await query.message.edit(script.MVE_NT_FND, reply_markup=contact_admin_button)
-                await asyncio.sleep(10)
+                await asyncio.sleep(35)
                 await k.delete()
-                
+
+@Client.on_callback_query(filters.regex(r"action_(\w+)_(\d+)\|(.+)"))
+async def handle_actions(client, callback_query):
+    action, user_id, search = re.match(r"action_(\w+)_(\d+)\|(.+)", callback_query.data).groups()
+    user_id = int(user_id)
+
+    try:
+        user = await client.get_users(user_id)
+        search_encoded = search.replace(" ", "+")
+        user_mention = f"<b>👤 Hey {user.first_name}!</b>"
+        search_line = f"🔍 You searched for: <code>{search}</code>\n\n"
+
+        if action == "uploaded":
+            message_text = (
+    "✅ <b>ʏᴏᴜʀ ʀᴇϙᴜᴇꜱᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ ʜᴀꜱ ʙᴇᴇɴ ᴜᴘʟᴏᴀᴅᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ.</b>\n\n"
+    "📢 <i>ᴄʜᴇᴄᴋ ᴏᴜʀ ᴍᴏᴠɪᴇ ᴄʜᴀɴɴᴇʟ ᴀɴᴅ ʀᴇϙᴜᴇꜱᴛ ɢʀᴏᴜᴘ ᴛᴏ ɢᴇᴛ ɪᴛ. ɪꜰ ʏᴏᴜ ʜᴀᴠᴇɴ'ᴛ ᴊᴏɪɴᴇᴅ ʏᴇᴛ, ᴛᴀᴘ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴊᴏɪɴ ᴀʟʟ ᴄʜᴀɴɴᴇʟꜱ ᴀɴᴅ ɢʀᴏᴜᴘꜱ ᴀᴛ ᴏɴᴄᴇ.</i>\n\n"
+    "✅ <b>আপনার রিকুয়েস্টকৃত কন্টেন্টটি সফলভাবে আপলোড করা হয়েছে।</b>\n\n"
+    "📢 <i>আমাদের মুভি চ্যানেল এবং রিকুয়েস্ট গ্রুপ থেকে আপনার কন্টেন্টটি সংগ্রহ করতে পারেন। "
+    "যদি এখনও জয়েন না হয়ে থাকেন, তাহলে নিচের বাটনে ক্লিক করে একবারেই সকল চ্যানেল এবং গ্রুপে জয়েন হতে পারবেন।</i>"
+                )
+            keyboard = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Jᴏɪɴ ᴏᴜʀ ᴀʟʟ ᴄʜᴀɴɴᴇʟs ᴀɴᴅ ɢʀᴏᴜᴘs ɪɴ ᴏɴᴇ ᴄʟɪᴄᴋ", url=f"https://t.me/addlist/ceobDOjc7202ZmVl")]]
+            )
+            await client.send_photo(
+                chat_id=user_id,
+                photo="https://i.postimg.cc/fySmH2GT/IMG-20250512-060032-257.jpg",
+                caption=f"{user_mention}\n{search_line}{message_text}",
+                reply_markup=keyboard
+            )
+        elif action == "spellcheck":
+            message_text = (
+    "❌ <b>ɪᴛ ꜱᴇᴇᴍꜱ ʏᴏᴜʀ ʀᴇϙᴜᴇꜱᴛ ʜᴀꜱ ᴀ ꜱᴘᴇʟʟɪɴɢ ᴍɪꜱᴛᴀᴋᴇ.</b>\n\n"
+    "📢 <i>ᴛᴏ ɢᴇᴛ ᴛʜᴇ ᴄᴏʀʀᴇᴄᴛ ᴍᴏᴠɪᴇ ᴏʀ ꜱᴇʀɪᴇꜱ, ʏᴏᴜ ᴍᴜꜱᴛ ᴜꜱᴇ ᴛʜᴇ ᴄᴏʀʀᴇᴄᴛ ɴᴀᴍᴇ. "
+    "ᴏᴛʜᴇʀᴡɪꜱᴇ, ᴛʜᴇ ꜰɪʟᴇ ᴡᴏɴ'ᴛ ʙᴇ ꜰᴏᴜɴᴅ. "
+    "ɪꜰ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ꜱᴜʀᴇ ᴀʙᴏᴜᴛ ᴛʜᴇ ᴄᴏʀʀᴇᴄᴛ ɴᴀᴍᴇ, ᴘʀᴇꜱꜱ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ɪᴛ ꜰʀᴏᴍ ɢᴏᴏɢʟᴇ.</i>\n\n"
+    "❌ <b>আপনি যে রিকুয়েস্টটি করেছেন সেটিতে বানান ভুল রয়েছে মনে হচ্ছে।</b>\n\n"
+    "📢 <i>সঠিক মুভি বা ওয়েব সিরিজ পেতে সঠিক নাম ব্যবহার করুন। "
+    "না হলে ফাইল খুঁজে পাওয়া যাবে না। "
+    "যদি সঠিক নামটি না জানেন, তাহলে নিচের বাটনে ক্লিক করে সরাসরি Google থেকে সঠিক নামটি দেখে নিন।</i>"
+            )
+            keyboard = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("✏️ Cʜᴇᴄᴋ Sᴘᴇʟʟɪɴɢ ᴏɴ Gᴏᴏɢʟᴇ 🔍", url=f"https://www.google.com/search?q={search_encoded}")]]
+            )
+            await client.send_photo(
+                chat_id=user_id,
+                photo="https://i.postimg.cc/8CLst5d5/IMG-20250508-153346-518.jpg",
+                caption=f"{user_mention}\n{search_line}{message_text}",
+                reply_markup=keyboard
+            )
+
+        elif action == "notreleased":
+            message_text = (
+    "⏳ <b>ᴛʜᴇ ᴄᴏɴᴛᴇɴᴛ ʏᴏᴜ ʀᴇϙᴜᴇꜱᴛᴇᴅ ʜᴀꜱ ɴᴏᴛ ʙᴇᴇɴ ʀᴇʟᴇᴀꜱᴇᴅ ʏᴇᴛ.</b>\n\n"
+    "📢 <i>ᴛʜᴇ ᴄᴏɴᴛᴇɴᴛ ᴡɪʟʟ ʙᴇ ᴀᴠᴀɪʟᴀʙʟᴇ ᴀꜰᴛᴇʀ ɪᴛꜱ ʀᴇʟᴇᴀꜱᴇ ᴅᴀᴛᴇ. "
+    "ɪꜰ ʏᴏᴜ ᴀʀᴇ ᴜɴꜱᴜʀᴇ ᴀʙᴏᴜᴛ ᴛʜᴇ ʀᴇʟᴇᴀꜱᴇ ᴅᴀᴛᴇ, ᴘʀᴇꜱꜱ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴄʜᴇᴄᴋ ɪᴛ ᴏɴ ɢᴏᴏɢʟᴇ.</i>\n\n"
+    "⏳ <b>আপনি যে রিকুয়েস্টটি করেছেন, সেই কন্টেন্টটি এখনো রিলিজ হয়নি।</b>\n\n"
+    "📢 <i>এই কন্টেন্টটি রিলিজ হওয়ার পরেই পাওয়া যাবে। "
+    "যদি আপনি সঠিক রিলিজ ডেটটি না জানেন, তাহলে নিচের বাটনে ক্লিক করে সরাসরি Google থেকে রিলিজ ডেটটি দেখে নিতে পারেন।</i>"
+            )
+            keyboard = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("🗓️ Cʜᴇᴄᴋ ʀᴇʟᴇᴀsᴇ ᴅᴀᴛᴇ 🔍", url=f"https://www.google.com/search?q={search_encoded}+release+date")]]
+            )
+            await client.send_photo(
+                chat_id=user_id,
+                photo="https://i.postimg.cc/Gppz0W2v/IMG-20250508-153539-360.jpg",
+                caption=f"{user_mention}\n{search_line}{message_text}",
+                reply_markup=keyboard
+            )
+
+        elif action == "processing":
+            message_text = (
+    "🛠️ <b>ʏᴏᴜʀ ʀᴇϙᴜᴇꜱᴛ ɪꜱ ᴄᴜʀʀᴇɴᴛʟʏ ʙᴇɪɴɢ ᴘʀᴏᴄᴇꜱꜱᴇᴅ.</b>\n\n"
+    "📢 <i>ᴛʜᴀᴛ ᴍᴇᴀɴꜱ ɪᴛ ɪꜱ ᴄᴜʀʀᴇɴᴛʟʏ ʙᴇɪɴɢ ᴜᴘʟᴏᴀᴅᴇᴅ. "
+    "ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ ꜰᴏʀ ᴀ ꜱʜᴏʀᴛ ᴡʜɪʟᴇ. "
+    "ᴏɴᴄᴇ ɪᴛ'ꜱ ᴅᴏɴᴇ, ʏᴏᴜ ᴡɪʟʟ ʀᴇᴄᴇɪᴠᴇ ᴀ ɴᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ.</i>\n\n"
+    "🛠️ <b>আপনি যে কনটেন্টটির রিকুয়েস্ট করেছেন, সেটি এখন প্রসেসিং এ আছে।</b>\n\n"
+    "📢 <i>মানে, এটি বর্তমানে আপলোড হচ্ছে। "
+    "তাই আপনাকে কিছু সময় অপেক্ষা করতে হবে। "
+    "আপলোড হয়ে গেলে আপনাকে নোটিফাই করা হবে।</i>"
+            )
+            final_msg = f"{user_mention}\n{search_line}{message_text}"
+            await client.send_message(user_id, final_msg)
+
+        elif action == "typeinenglish":
+            message_text = (
+    "✍️ <b>ᴛʜᴇ ᴄᴏɴᴛᴇɴᴛ ʏᴏᴜ ʀᴇϙᴜᴇꜱᴛᴇᴅ ɪꜱ ᴀᴠᴀɪʟᴀʙʟᴇ, ʙᴜᴛ ʏᴏᴜ ɴᴇᴇᴅ ᴛᴏ ᴛʏᴘᴇ ᴛʜᴇ ɴᴀᴍᴇ ɪɴ ᴇɴɢʟɪꜱʜ.</b>\n\n"
+    "📢 <i>ᴊᴜꜱᴛ ᴡʀɪᴛᴇ ᴛʜᴇ ᴍᴏᴠɪᴇ ᴏʀ ꜱᴇʀɪᴇꜱ ɴᴀᴍᴇ ɪɴ ᴇɴɢʟɪꜱʜ, ᴏᴛʜᴇʀᴡɪꜱᴇ, ᴛʜᴇ ꜰɪʟᴇ ᴡᴏɴ'ᴛ ʙᴇ ꜰᴏᴜɴᴅ. "
+    "ɪꜰ ʏᴏᴜ ᴀʀᴇ ᴜɴꜱᴜʀᴇ ᴀʙᴏᴜᴛ ᴛʜᴇ ᴄᴏʀʀᴇᴄᴛ ꜱᴘᴇʟʟɪɴɢ, ᴛᴀᴘ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ɪᴛ ꜰʀᴏᴍ ɢᴏᴏɢʟᴇ.</i>\n\n"
+    "✍️ <b>আপনি যে কন্টেন্টটি রিকুয়েস্ট করেছেন, সেটি আছে। কিন্তু আপনাকে সেটার নাম ইংরেজিতে লিখতে হবে।</b>\n\n"
+    "📢 <i>শুধুমাত্র কন্টেন্টটির নাম ইংরেজিতে লিখুন। "
+    "যদি সঠিক বানান না জানেন, তাহলে নিচের বাটনে ক্লিক করে সরাসরি Google থেকে দেখে নিতে পারেন।</i>"
+            )
+            keyboard = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("🔍 Cʜᴇᴄᴋ ᴛʜᴇ Eɴɢʟɪsʜ ɴᴀᴍᴇ ᴏɴ Gᴏᴏɢʟᴇ ✏️", url=f"https://www.google.com/search?q={search_encoded}")]]
+            )
+            await client.send_photo(
+                chat_id=user_id,
+                photo="https://i.postimg.cc/sgS1gnG7/check-37583-1280.png",
+                caption=f"{user_mention}\n{search_line}{message_text}",
+                reply_markup=keyboard
+            )
+
+        elif action == "notavailable":
+            message_text = (
+    "❌ <b>ʀᴇϙᴜᴇꜱᴛᴇᴅ ᴄᴏɴᴛᴇɴᴛ ɪꜱ ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ ᴀᴛ ᴛʜᴇ ᴍᴏᴍᴇɴᴛ.</b>\n\n"
+    "📢 <i>ɪᴛ ᴍɪɢʜᴛ ʜᴀᴠᴇ ʙᴇᴇɴ ʀᴇᴍᴏᴠᴇᴅ ᴏʀ ɴᴇᴠᴇʀ ᴜᴘʟᴏᴀᴅᴇᴅ. "
+    "ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɴᴏᴛʜᴇʀ ᴄᴏɴᴛᴇɴᴛ ᴏʀ ᴡᴀɪᴛ ᴀ ꜰᴇᴡ ᴍᴏᴍᴇɴᴛꜱ ᴀɴᴅ ᴄʜᴇᴄᴋ ᴀɢᴀɪɴ. "
+    "ɪꜰ ᴛʜᴇ ᴄᴏɴᴛᴇɴᴛ ʙᴇᴄᴏᴍᴇꜱ ᴀᴠᴀɪʟᴀʙʟᴇ, ʏᴏᴜ ᴡɪʟʟ ʙᴇ ɴᴏᴛɪꜰɪᴇᴅ.</i>\n\n"
+    "❌ <b>দুঃখিত, আপনি যে কন্টেন্টটির জন্য রিকোয়েস্ট করেছেন, সেটি বর্তমানে আমাদের কাছে এভেলেবল নেই।</b>\n\n"
+    "📢 <i>সেটা হয়তো রিমুভ করা হয়েছে বা এখনো আপলোড করা হয়নি। "
+    "তাই দয়া করে অন্য কোনো কন্টেন্টের জন্য চেষ্টা করুন অথবা কিছু সময় পর আবার চেষ্টা করুন। "
+    "যদি কন্টেন্টটি তখন এভেলেবল হয়, তাহলে আপনাকে জানিয়ে দেওয়া হবে।</i>"
+            )
+            final_msg = f"{user_mention}\n{search_line}{message_text}"
+            await client.send_message(user_id, final_msg)
+
+        elif action == "contact":  
+            message_text = (
+    "📞 <b>ɴᴇᴇᴅ ʜᴇʟᴘ?</b>\n\n"
+    "📢 <i>ɪꜰ ʏᴏᴜ'ʀᴇ ꜰᴀᴄɪɴɢ ᴀɴʏ ɪssᴜᴇ ᴏʀ ɴᴇᴇᴅ ᴀssɪsᴛᴀɴᴄᴇ, "
+    "ꜰᴇᴇʟ ꜰʀᴇᴇ ᴛᴏ ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴀᴅᴍɪɴ.</i>\n\n"
+    "📞 <b>ᴅᴏ ʏᴏᴜ ᴛʜɪɴᴋ ᴛʜᴇʀᴇ ɪs ᴀɴ ɪssᴜᴇ?</b>\n"
+    "❗ <i>ɪꜰ ʏᴏᴜ ᴀʀᴇ ᴇxᴘᴇʀɪᴇɴᴄɪɴɢ ᴀɴʏ ᴘʀᴏʙʟᴇᴍ ᴏʀ ɪꜰ ʏᴏᴜ ᴛʰɪɴᴋ "
+    "ɪᴛ'ꜱ ɴᴇᴇᴅɪɴɢ ᴀᴅᴍɪɴ'ꜱ ᴀssɪsᴛᴀɴᴄᴇ, ʏᴏᴜ ᴄᴀɴ ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴀᴅᴍɪɴ "
+    "ᴄᴏᴍꜱ ᴛᴏ ʏᴏᴜ ᴀɴᴅ ʀᴇᴇᴠᴇᴀʟ ʏᴏᴜʀ ɪssᴜᴇ ᴀɴᴅ ᴛʜᴇʏ ᴡɪʟʟ ʜᴇʟᴘ "
+    "ʏᴏᴜ ᴡɪᴛʜ ɪᴛ.</i>\n\n"
+    "📢 <i>ʏᴏᴜ ᴄᴀɴ ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴀᴅᴍɪɴ ᴇᴀꜱɪʟʏ ʙʏ ᴄʟɪᴄᴋɪɴɢ ᴏɴ ᴛʜᴇ "
+    "ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴀɴᴅ ɢᴇᴛ ʏᴏᴜʀ ɪssᴜᴇ ʀᴇsᴏʟᴠᴇᴅ ᴛᴏᴏ.</i>\n\n"
+    "📞 <b>আপনার মনে হচ্ছে কোনো সমস্যা হয়েছে, তাই না? যদি কোন সমস্যা হয়, "
+    "তাহলে আমাদের এডমিনের সাথে যোগাযোগ করতে পারেন।</b>\n\n"
+    "📢 <i>আপনার সমস্যাটি এডমিন সমাধান করে দিবেন, আশা করছি। "
+    "নিচের বাটনে ক্লিক করে আপনি সরাসরি এডমিনের সাথে যোগাযোগ করতে পারবেন।</i>"
+            )
+            keyboard = InlineKeyboardMarkup(  
+                [[InlineKeyboardButton("💬 Cᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ 📞", url=f"https://t.me/Prime_Admin_Support_ProBot")]]  
+            )  
+            await client.send_photo(  
+                chat_id=user_id,  
+                photo="https://i.postimg.cc/fyC37H5Y/In-Shot-20250509-130447862.jpg",  
+                caption=f"{user_mention}\n{search_line}{message_text}",  
+                reply_markup=keyboard  
+            )  
+
+        elif action == "premium":  
+            message_text = (
+    "💎 <b>ɪᴛʜɪs ᴄᴏɴᴛᴇɴᴛ ɪs ᴀᴠᴀɪʟᴀʙʟᴇ ꜰᴏʀ ᴘʀᴇᴍɪᴜᴍ ᴜsᴇʀs ᴏɴʟʏ.</b> 🎬\n"
+    "🎥 ᴡᴇ ʜᴀᴠᴇ ᴛʜᴇ ғɪʟᴇ ʏᴏᴜ'ʀᴇ ʟᴏᴏᴋɪɴɢ ꜰᴏʀ, ʙᴜᴛ ʏᴏᴜ'ʟʟ ɴᴇᴇᴅ ᴛᴏ ᴜᴘɢʀᴀᴅᴇ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ ᴛᴏ ᴀᴄᴄᴇss ɪᴛ. 🔑\n\n"
+    "💡 ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ʟᴇᴀʀɴ ᴍᴏʀᴇ ᴀɴᴅ sᴜʙsᴄʀɪʙᴇ. 🚀\n\n"
+    "💎 <b>এই কনটেন্টটি শুধুমাত্র প্রিমিয়াম ইউজারদের জন্য উপলব্ধ।</b> 🎥\n"
+    "🔓 আমাদের কাছে আপনি যে ফাইলটি খুঁজছেন, সেটি রয়েছে, তবে এটি অ্যাক্সেস করতে প্রিমিয়াম সাবস্ক্রিপশন করতে হবে।\n\n"
+    "🔔 আরও জানার জন্য এবং সাবস্ক্রাইব করতে নিচের বাটনে ক্লিক করুন। 👇"
+            )
+            keyboard = InlineKeyboardMarkup(  
+                [[InlineKeyboardButton("💎 Gᴇᴛ Pʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇss 🚀", callback_data="premium2")]]  
+            )  
+            await client.send_photo(  
+                chat_id=user_id,  
+                photo="https://i.postimg.cc/j2v5nZ4m/file-000000007d0461f88bc7fa3cfa687bd4-conversation-id-681d5240-27b8-800e-a7f8-f4268a53fe3c-message-i.png",  
+                caption=f"{user_mention}\n{search_line}{message_text}",  
+                reply_markup=keyboard  
+            )  
+
+        else:
+            message_text = "⚠️ Invalid action."
+            final_msg = f"{user_mention}\n{search_line}{message_text}"
+            await client.send_message(user_id, final_msg)
+
+        await callback_query.answer("✅ Message sent to the user.", show_alert=True)
+
+    except Exception:
+        await callback_query.answer("❗ The user has not started the bot yet!", show_alert=True)
+            
+
+
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     lazyData = query.data
@@ -1240,7 +1420,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             silent_stream = f"{URL}watch/{str(silent_msg.id)}/{quote_plus(get_name(silent_msg))}?hash={get_hash(silent_msg)}"
             silent_download = f"{URL}{str(silent_msg.id)}/{quote_plus(get_name(silent_msg))}?hash={get_hash(silent_msg)}"
             await silent_msg.reply_text(
-                text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
+                text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ @iPapkornprimebot ☠︎⚔ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
                 quote=True,
                 disable_web_page_preview=True,
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🚀 Fast Download 🚀", url=silent_download),  # we download Link
@@ -1278,13 +1458,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
         buttons = [[
                     InlineKeyboardButton('+ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ +', url=f'http://telegram.me/{temp.U_NAME}?startgroup=true')
                 ],[
-                    InlineKeyboardButton('• ᴛᴏᴘ •', callback_data="topsearch"),
-                    InlineKeyboardButton('• ᴜᴘɢʀᴀᴅᴇ •', callback_data="premium"),
+                    InlineKeyboardButton('• ᴇᴀʀɴ ᴍᴏɴᴇʏ •', callback_data="earn"),
+                    InlineKeyboardButton('• ᴜᴘɢʀᴀᴅᴇ ᴘʟᴀɴ •', callback_data="premium"),
                 ],[
                     InlineKeyboardButton('• ʜᴇʟᴘ •', callback_data='features'),
-                    InlineKeyboardButton('• ᴀʙᴏᴜᴛ •', callback_data='bot')
+                    InlineKeyboardButton('• ᴀʙᴏᴜᴛ ʙᴏᴛᴢ •', callback_data='botz_about')
                 ],[
-                    InlineKeyboardButton('• ᴇᴀʀɴ ᴍᴏɴᴇʏ ᴡɪᴛʜ ʙᴏᴛ •', callback_data="earn")
+                    InlineKeyboardButton('✧ ᴄʀᴇᴀᴛᴏʀ ✧', url=OWNER_LNK)
                 ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         await client.edit_message_media(
@@ -1297,6 +1477,35 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
+
+    
+    elif query.data == "botz_about":
+        try:
+            btn = [[
+                InlineKeyboardButton("• ʀᴇQᴜᴇsᴛ ɢʀᴏᴜᴘ •", url=GRP_LNK),
+                InlineKeyboardButton("• Sᴜᴘᴘᴏʀᴛ Gʀᴏᴜᴘ •", url=OWNER_SUPP)
+            ],[
+                InlineKeyboardButton("• ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ •", url=UPDATE_CHANNEL_LNK)
+            ],[
+                InlineKeyboardButton("• Mᴏᴠɪᴇs Cʜᴀɴɴᴇʟ •", url=CHNL_LNK),
+                InlineKeyboardButton("• ᴀʙᴏᴜᴛ •", callback_data="bot")
+            ],[
+                InlineKeyboardButton("⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋", callback_data="start")
+            ]]
+            reply_markup = InlineKeyboardMarkup(btn)
+
+            await client.edit_message_media(
+                chat_id=query.message.chat.id,
+                message_id=query.message.id,
+                media=InputMediaPhoto(
+                    media="https://i.ibb.co/DDKfvJCX/photo-2025-04-14-08-24-42-7493081901167542280.jpg",
+                    caption="ʜᴇʀᴇ ɪꜱ ᴀʙᴏᴜᴛ ᴛʜᴇ ʙᴏᴛ ᴀɴᴅ ɪᴛꜱ ꜰᴇᴀᴛᴜʀᴇꜱ...",
+                    parse_mode=enums.ParseMode.HTML
+                ),
+                reply_markup=reply_markup
+            )
+        except Exception as e:
+            print(e)
   
     elif query.data == "give_trial":
         try:
@@ -1340,11 +1549,33 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except Exception as e:
             print(e)
 
+    elif query.data == "premium2":
+        try:
+            btn = [[
+                InlineKeyboardButton('• ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •', callback_data='buy'),
+            ],[
+                InlineKeyboardButton('• ʀᴇꜰᴇʀ ꜰʀɪᴇɴᴅꜱ', callback_data='reffff'),
+                InlineKeyboardButton('ꜰʀᴇᴇ ᴛʀɪᴀʟ •', callback_data='give_trial')
+            ],[            
+                InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start'),
+            ],[
+                InlineKeyboardButton('🚫 ᴄʟᴏꜱᴇ 🚫', callback_data='close_data')
+            ]]
+            reply_markup = InlineKeyboardMarkup(btn)                        
+            
+            await query.message.reply_photo(
+                photo=random.choice(PICS),
+                caption=script.BPREMIUM_TXT,
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML
+            )
+        except Exception as e:
+            print(e)
+
     elif query.data == "buy":
         try:
             btn = [[ 
-                InlineKeyboardButton('ꜱᴛᴀʀ', callback_data='star'),
-                InlineKeyboardButton('ᴜᴘɪ', callback_data='upi')
+                InlineKeyboardButton('• ꜱᴇɴᴅ ᴘᴀʏᴍᴇɴᴛ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ •', url=OWNER_BOTZ),
             ],[
                 InlineKeyboardButton('🚫 ᴄʟᴏꜱᴇ 🚫', callback_data='close_data')
             ]]
@@ -1357,6 +1588,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ) 
         except Exception as e:
             print(e)
+
 
     elif query.data == "upi":
         try:
@@ -1423,15 +1655,16 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "earn":
         try:
-            btn = [[ 
-                InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
-            ]]
+            btn = [
+                [InlineKeyboardButton('💬 ᴘʀɪᴍᴇ ʙᴏᴛᴢ sᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ 💬', url=OWNER_SUPP)],
+                [InlineKeyboardButton('🚫 ᴄʟᴏꜱᴇ 🚫', callback_data='close_data')]
+            ]
             reply_markup = InlineKeyboardMarkup(btn)
-            await query.message.edit_text(
+            await query.message.reply(
                 text=script.EARN_INFO.format(temp.B_LINK),
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML
-            ) 
+            )
         except Exception as e:
             print(e)
 
@@ -1535,7 +1768,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "bot":
         buttons = [[
             InlineKeyboardButton('‼️ ᴅɪꜱᴄʟᴀɪᴍᴇʀ ‼️', callback_data='disclaimer'),
-            InlineKeyboardButton ('• sᴏᴜʀᴄᴇ •', callback_data='source'),
+            InlineKeyboardButton ('• sᴏᴜʀᴄᴇ •', url=OWNER_BOTZ),
         ],[
             InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
         ]]
@@ -1548,7 +1781,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
     elif query.data == "source":
         buttons = [[
-            InlineKeyboardButton('ꜱᴏᴜʀᴄᴇ ᴄᴏᴅᴇ 📜', url='https://github.com/NBBotz/Auto_Filter_Bot.git'),
+            InlineKeyboardButton('ꜱᴏᴜʀᴄᴇ ᴄᴏᴅᴇ 📜', url=OWNER_BOTZ),
             InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
@@ -1651,48 +1884,107 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
 async def auto_filter(client, msg, spoll=False):
     curr_time = datetime.now(pytz.timezone('Asia/Kolkata')).time()
+
     if not spoll:
         message = msg
-        if message.text.startswith("/"): return
-        if re.findall("((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
+        if message.text.startswith("/"):
             return
+
+        if re.findall(r"((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
+            return
+
         if len(message.text) < 100:
-            search = message.text         
-            search = search.lower()
-            m=await message.reply_text(f'<b>Wᴀɪᴛ {message.from_user.mention} Sᴇᴀʀᴄʜɪɴɢ Yᴏᴜʀ Qᴜᴇʀʏ :<i>{search}...</i></b>', reply_to_message_id=message.id)
+            search = message.text.lower()
+            m = await message.reply_text(
+                f'🤖 <i>{search} <b>sᴇᴀʀᴄʜɪɴɢ...</b></i>',
+                reply_to_message_id=message.id
+            )
+
+            # প্রাসঙ্গিক শব্দ বাদ দিয়ে ক্লিন সার্চ তৈরি করা
             find = search.split(" ")
             search = ""
-            removes = ["in","upload", "series", "full", "horror", "thriller", "mystery", "print", "file"]
+            removes = ["in", "upload", "series", "full", "horror", "thriller", "mystery", "print", "file"]
             for x in find:
                 if x in removes:
                     continue
-                else:
-                    search = search + x + " "
-            search = search.replace("-", " ")
-            search = search.replace(":","")
-            search = re.sub(r'\s+', ' ', search).strip()
-            files, offset, total_results = await get_search_results(message.chat.id ,search, offset=0, filter=True)
+                search += x + " "
+            search = search.replace("-", " ").replace(":", "")
+
+            # সার্চ করা
+            files, offset, total_results = await get_search_results(message.chat.id, search, offset=0, filter=True)
             settings = await get_settings(message.chat.id)
+
+            # কিছু না পেলে, অ্যাডভান্স চেকিং আগে
             if not files:
                 if settings["spell_check"]:
                     ai_sts = await m.edit('🤖 ᴘʟᴇᴀꜱᴇ ᴡᴀɪᴛ, ᴀɪ ɪꜱ ᴄʜᴇᴄᴋɪɴɢ ʏᴏᴜʀ ꜱᴘᴇʟʟɪɴɢ...')
-                    is_misspelled = await ai_spell_check(chat_id = message.chat.id,wrong_name=search)
+                    is_misspelled = await ai_spell_check(chat_id=message.chat.id, wrong_name=search)
+
                     if is_misspelled:
-                        await ai_sts.edit(f'<b>✅Aɪ Sᴜɢɢᴇsᴛᴇᴅ ᴍᴇ<code> {is_misspelled}</code> \nSᴏ Iᴍ Sᴇᴀʀᴄʜɪɴɢ ғᴏʀ <code>{is_misspelled}</code></b>')
+                        await ai_sts.edit(
+                            f'<b>✅ Aɪ Sᴜɢɢᴇsᴛᴇᴅ ᴍᴇ<code> {is_misspelled}</code>\nSᴏ Iᴍ Sᴇᴀʀᴄʜɪɴɢ ғᴏʀ <code>{is_misspelled}</code></b>'
+                        )
                         await asyncio.sleep(2)
                         message.text = is_misspelled
                         await ai_sts.delete()
                         return await auto_filter(client, message)
+
                     await ai_sts.delete()
-                    return await advantage_spell_chok(client, message)
-        else:
-            return
+
+                    # অ্যাডভান্স চেকিং
+                    found = await advantage_spell_chok(client, message)
+                    if found:
+                        return
+
+                # অ্যাডভান্স চেকিং না পেলে, চ্যানেলে পোস্ট করা হবে
+                await client.send_message(  
+    req_channel,
+    f"✨ **🚫 ɴᴏ ꜰɪʟᴇ ʀᴇǫᴜᴇsᴛᴇᴅ 🚫** ✨\n\n"
+    f"🎬 **ꜰɪʟᴇ ɴᴀᴍᴇ:** `{search}`\n"
+    f"🆔 **ᴜsᴇʀ ɪᴅ:** [ᴠɪᴇᴡ ᴩʀᴏꜰɪʟᴇ](tg://openmessage?user_id={message.from_user.id})\n"
+    f"👤 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ:** `{message.from_user.first_name}`\n"
+    f"⏰ **ʀᴇǫᴜᴇsᴛᴇᴅ ᴏɴ:** `{datetime.now().strftime('%d %B %Y, %I:%M %p')}`\n"
+    f"💌 **sᴛᴀᴛᴜs:** ᴩᴇɴᴅɪɴɢ 🔄\n", 
+    reply_markup = InlineKeyboardMarkup([
+    # ✅ বড় বোতাম - Uploaded Done
+    [InlineKeyboardButton("✅ ᴜᴩʟᴏᴀᴅᴇᴅ ᴅᴏɴᴇ ✅", callback_data=f"action_uploaded_{message.from_user.id}|{search.strip()}")],
+
+    # ❌ পাশাপাশি দুইটা ছোট বোতাম - Spelling Check & Not Released
+    [
+        InlineKeyboardButton("❌ ᴄʜᴇᴄᴋ sᴩᴇʟʟɪɴɢ", callback_data=f"action_spellcheck_{message.from_user.id}|{search.strip()}"),
+        InlineKeyboardButton("⏳ ɴᴏᴛ ʀᴇʟᴇᴀsᴇᴅ ʏᴇᴛ", callback_data=f"action_notreleased_{message.from_user.id}|{search.strip()}")
+    ],
+
+    # 🔎 বড় বোতাম - Google Search
+    [InlineKeyboardButton("🔎 sᴇᴀʀᴄʜ ᴀɴᴅ ᴄʜᴇᴄᴋ ᴏɴ ɢᴏᴏɢʟᴇ 🔍", url=f"https://www.google.com/search?q={search.replace(' ', '+')}")],
+    # ⚙️ পাশাপাশি দুইটা বড় বোতাম - Processing & Type in English
+    [
+        InlineKeyboardButton("🛠️ ᴜɴᴅᴇʀ ᴩʀᴏᴄᴇssɪɴɢ", callback_data=f"action_processing_{message.from_user.id}|{search.strip()}"),
+        InlineKeyboardButton("🔤 ᴛʏᴩᴇ ɪɴ ᴇɴɢʟɪsʜ", callback_data=f"action_typeinenglish_{message.from_user.id}|{search.strip()}")
+    ],
+    # 📞 বড় বোতাম - Contact for Problem
+    [InlineKeyboardButton("📞 ᴄᴏɴᴛᴀᴄᴛ ꜰᴏʀ ᴀɴʏ ᴘʀᴏʙʟᴇᴍ 💬", callback_data=f"action_contact_{message.from_user.id}|{search.strip()}")],        
+    # ❗ পাশাপাশি দুইটা - Not Available & Premium Required
+    [
+        InlineKeyboardButton("🚫 ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ", callback_data=f"action_notavailable_{message.from_user.id}|{search.strip()}"),
+        InlineKeyboardButton("💎 ᴩʀᴇᴍɪᴜᴍ ʀᴇǫᴜɪʀᴇᴅ", callback_data=f"action_premium_{message.from_user.id}|{search.strip()}")
+    ],
+    # 💥 বড় বোতাম - Close
+    [InlineKeyboardButton("💥 ᴄʟᴏsᴇ 💥", callback_data="close_data")]
+])
+                )
+                return
     else:
         message = msg.message.reply_to_message
         search, files, offset, total_results = spoll
-        m=await message.reply_text(f'<b>Wᴀɪᴛ {message.from_user.mention} Sᴇᴀʀᴄʜɪɴɢ Yᴏᴜʀ Qᴜᴇʀʏ :<i>{search}...</i></b>', reply_to_message_id=message.id)
+        m = await message.reply_text(
+            f'🤖 <i>{search} <b>sᴇᴀʀᴄʜɪɴɢ...</b></i>',
+            reply_to_message_id=message.id
+        )
         settings = await get_settings(message.chat.id)
         await msg.message.delete()
+
+    # সার্চ ফলাফল সেভ করা
     key = f"{message.chat.id}-{message.id}"
     FRESH[key] = search
     temp.GETALL[key] = files
@@ -1895,7 +2187,7 @@ async def advantage_spell_chok(client, message):
             InlineKeyboardButton("🔍 ᴄʜᴇᴄᴋ sᴘᴇʟʟɪɴɢ ᴏɴ ɢᴏᴏɢʟᴇ 🔍", url=f"https://www.google.com/search?q={google}")
         ]]
         k = await message.reply_text(text=script.I_CUDNT.format(search), reply_markup=InlineKeyboardMarkup(button))
-        await asyncio.sleep(60)
+        await asyncio.sleep(30)
         await k.delete()
         try:
             await message.delete()
@@ -1912,7 +2204,7 @@ async def advantage_spell_chok(client, message):
         [InlineKeyboardButton(text="🚫 ᴄʟᴏsᴇ 🚫", callback_data='close_data')]
     )
     d = await message.reply_text(text=script.CUDNT_FND.format(message.from_user.mention), reply_markup=InlineKeyboardMarkup(buttons), reply_to_message_id=message.id)
-    await asyncio.sleep(60)
+    await asyncio.sleep(10)
     await d.delete()
     try:
         await message.delete()
