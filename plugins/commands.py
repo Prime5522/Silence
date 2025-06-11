@@ -78,22 +78,30 @@ async def start(client, message):
         )
         await asyncio.sleep(300)
         await dlt.delete()
-        return         
-    if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
-        silenxbotz=await message.reply_sticker("CAACAgUAAxkBAAIhiGgChBCFgBzBMErPOr8TJBl8MSJiAAJ9GQACSnqRVJrQkxEqYXj1HgQ")
-        await asyncio.sleep(5)
-        await silenxbotz.delete()
-        await message.reply_text(
-            "🤖 ɪ ᴀᴍ ᴛʜᴇ ғɪʀsᴛ ᴀɴᴅ ᴍᴏsᴛ ᴀᴅᴠᴀɴᴄᴇᴅ ᴍᴏᴠɪᴇ ᴀɴᴅ ᴡᴇʙ sᴇʀɪᴇs ᴘʀᴏᴠɪᴅᴇʀ ʙᴏᴛ. ᴊᴜsᴛ ɢɪᴠᴇ ᴍᴇ ᴀ ᴄᴏʀʀᴇᴄᴛ ɴᴀᴍᴇ ᴀɴᴅ ɪ ᴡɪʟʟ ᴇxᴛʀᴀᴄᴛ ᴛʜᴇ ғɪʟᴇ ғᴏʀ ʏᴏᴜ ɴɪᴄᴇʟʏ.\n\n"
-            "✔️ ʙᴇғᴏʀᴇ ᴍᴀᴋɪɴɢ ᴀ ʀᴇǫᴜᴇsᴛ, ʙᴇ sᴜʀᴇ ᴛᴏ ᴄʜᴇᴄᴋ ᴛʜᴇ ᴄᴏʀʀᴇᴄᴛ sᴘᴇʟʟɪɴɢ ᴀɴᴅ ʀᴇʟᴇᴀsᴇ ʏᴇᴀʀ ғʀᴏᴍ ɢᴏᴏɢʟᴇ.\n\n"
-            "🙏 ᴛʜᴇɴ ɪ ʜᴏᴘᴇ ʏᴏᴜʀ ʙʀᴏᴛʜᴇʀ ᴡɪʟʟ ɢᴇᴛ ɪᴛ.\n\n"
-            "✨ ᴛʜᴀɴᴋ ʏᴏᴜ ꜰᴏʀ ᴜsɪɴɢ ᴏᴜʀ @iPapkornprimebot"
-        )
-        if not await db.get_chat(message.chat.id):
-            total=await client.get_chat_members_count(message.chat.id)
-            await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, "Unknown"))       
-            await db.add_chat(message.chat.id, message.chat.title)
         return 
+    if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
+            silenxbotz=await message.reply_sticker("CAACAgUAAxkBAAIhiGgChBCFgBzBMErPOr8TJBl8MSJiAAJ9GQACSnqRVJrQkxEqYXj1HgQ")
+            await asyncio.sleep(5)
+            await silenxbotz.delete()
+            await message.reply_text(
+                "🤖 ɪ ᴀᴍ ᴛʜᴇ ғɪʀsᴛ ᴀɴᴅ ᴍᴏsᴛ ᴀᴅᴠᴀɴᴄᴇᴅ ᴍᴏᴠɪᴇ ᴀɴᴅ ᴡᴇʙ sᴇʀɪᴇs ᴘʀᴏᴠɪᴅᴇʀ ʙᴏᴛ. ᴊᴜsᴛ ɢɪᴠᴇ ᴍᴇ ᴀ ᴄᴏʀʀᴇᴄᴛ ɴᴀᴍᴇ ᴀɴᴅ ɪ ᴡɪʟʟ ᴇxᴛʀᴀᴄᴛ ᴛʜᴇ ғɪʟᴇ ғᴏʀ ʏᴏᴜ ɴɪᴄᴇʟʏ.\n\n"
+                "✔️ ʙᴇғᴏʀᴇ ᴍᴀᴋɪɴɢ ᴀ ʀᴇǫᴜᴇsᴛ, ʙᴇ sᴜʀᴇ ᴛᴏ ᴄʜᴇᴄᴋ ᴛʜᴇ ᴄᴏʀʀᴇᴄᴛ sᴘᴇʟʟɪɴɢ ᴀɴᴅ ʀᴇʟᴇᴀsᴇ ʏᴇᴀʀ ғʀᴏᴍ ɢᴏᴏɢʟᴇ.\n\n"
+                "🙏 ᴛʜᴇɴ ɪ ʜᴏᴘᴇ ʏᴏᴜʀ ʙʀᴏᴛʜᴇʀ ᴡɪʟʟ ɢᴇᴛ ɪᴛ.\n\n"
+                "✨ ᴛʜᴀɴᴋ ʏᴏᴜ ꜰᴏʀ ᴜsɪɴɢ ᴏᴜʀ @iPapkornprimebot",
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton("📌 ᴄᴏɴᴛᴀᴄᴛ ꜱᴜᴘᴘᴏʀᴛ 📌", url=OWNER_LNK),
+                            InlineKeyboardButton("〄 ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ 〄", url=UPDATE_CHANNEL_LNK))
+                        ]
+                    ]
+                )
+            )
+            if not await db.get_chat(message.chat.id):
+                total=await client.get_chat_members_count(message.chat.id)
+                await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, "Unknown"))       
+                await db.add_chat(message.chat.id, message.chat.title)
+            return
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
