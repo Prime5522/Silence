@@ -21,23 +21,9 @@ async def save_group(bot, message):
     r_j_check = [u.id for u in message.new_chat_members]
     if temp.ME in r_j_check:
         if not await db.get_chat(message.chat.id):
-            total = await bot.get_chat_members_count(message.chat.id)
-            r_j = message.from_user.mention if message.from_user else "Anonymous"
-
-        # Time (BD timezone)
-            bd_time = (datetime.utcnow() + timedelta(hours=6)).strftime("%d-%m-%Y %I:%M %p")
-
-        # Group clickable link (for private groups)
-            group_link = f"<a href='https://t.me/c/{str(message.chat.id)[4:]}'>{message.chat.title}</a>"
-
-            log_msg = f"<b>➕ New Group Added</b>\n\n" \
-                      f"<b>📌 Group:</b> {group_link}\n" \
-                      f"<b>🆔 ID:</b> <code>{message.chat.id}</code>\n" \
-                      f"<b>👥 Members:</b> {total}\n" \
-                      f"<b>👤 Added By:</b> {r_j}\n" \
-                      f"<b>🕰 Time:</b> {bd_time}"
-
-            await bot.send_message(LOG_CHANNEL, log_msg, parse_mode="HTML", disable_web_page_preview=True)
+            total=await bot.get_chat_members_count(message.chat.id)
+            r_j = message.from_user.mention if message.from_user else "Anonymous" 
+            await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, r_j))       
             await db.add_chat(message.chat.id, message.chat.title)
         if message.chat.id in temp.BANNED_CHATS:
             
