@@ -127,7 +127,14 @@ async def start(client, message):
                 except Exception:
                     invite_link = "Could not generate invite link"
 
+                # অ্যাড করা ইউজার (sender) কে mention আকারে বানানো
+                if message.from_user:
+                    mention = f"[{message.from_user.first_name}](tg://user?id={message.from_user.id})"
+                else:
+                    mention = "Unknown User"
+
                 log_msg = script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, "Unknown")
+                log_msg += f"\n👤 Added by: {mention}"
                 log_msg += f"\n\n🔗 Invite Link: {invite_link}"
 
                 await client.send_message(LOG_CHANNEL, log_msg)
