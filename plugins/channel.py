@@ -1,31 +1,14 @@
 import re
-import io
-import math
-import random
-import string
-import aiohttp
-import asyncio
 import hashlib
 import requests
 from info import *
 from utils import *
-from typing import Optional
-from datetime import datetime
 from pyrogram import Client, filters
 from database.ia_filterdb import save_file
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 
 CAPTION_LANGUAGES = ["Bhojpuri", "Hindi", "Bengali", "Tamil", "English", "Bangla", "Telugu", "Malayalam", "Kannada", "Marathi", "Punjabi", "Bengoli", "Gujrati", "Korean", "Gujarati", "Spanish", "French", "German", "Chinese", "Arabic", "Portuguese", "Russian", "Japanese", "Odia", "Assamese", "Urdu"]
-
-SILENTX_UPDATE_CAPTION = """𝖭𝖤𝖶 𝖥𝖨𝖫𝖤 𝖠𝖣𝖣𝖤𝖣 ✅
-
-{} #{}
-📺 𝖥𝗈𝗋𝗆𝖺𝗍 - {}
-🔰 𝖰𝗎𝖺𝗅𝗂𝗍𝗒 - {}
-🔈 𝖠𝗎𝖽𝗂𝗈 - {}
-🖇️ <a href="{}">𝖨𝖬𝖣𝖡 𝖨𝗇𝖿𝗈</a>
-"""
 
 notified_movies = set()
 user_reactions = {}
@@ -52,51 +35,119 @@ async def media(bot, message):
         print(f"Error In Movie Update - {e}")
         pass
 
+
 async def send_movie_update(bot, file_name, caption):
     try:
         file_name = await movie_name_format(file_name)
         caption = await movie_name_format(caption)
+
+        # Clean file_name (remove URL, @mention, quality like 720p, and extra spaces)
+        clean_name = re.sub(r'https?://\S+', '', file_name)
+        clean_name = re.sub(r'@\w+', '', clean_name)
+        clean_name = re.sub(r'\b(?:480|720|1080)[pP]\b', '', clean_name)
+        clean_name = re.sub(r'\s{2,}', ' ', clean_name).strip()
+
+        title_line = f"🗃️ @PrimeCineHub {clean_name}"
+
         year_match = re.search(r"\b(19|20)\d{2}\b", caption)
-        year = year_match.group(0) if year_match else None      
+        year = year_match.group(0) if year_match else None
+
         season_match = re.search(r"(?i)(?:s|season)0*(\d{1,2})", caption) or re.search(r"(?i)(?:s|season)0*(\d{1,2})", file_name)
         if year:
             file_name = file_name[:file_name.find(year) + 4]
         elif season_match:
             season = season_match.group(1)
             file_name = file_name[:file_name.find(season) + 1]
+
         quality = await get_qualities(caption) or "HDRip"
-        pixel = await get_pixels(caption) or "720p"
         language = ", ".join([lang for lang in CAPTION_LANGUAGES if lang.lower() in caption.lower()]) or "Not Idea"
-        if file_name in notified_movies:
-            return 
-        notified_movies.add(file_name)
+
         imdb_data = await get_imdb_details(file_name)
         title = imdb_data.get("title", file_name)
-        imdb_link = imdb_data.get("url", "") if imdb_data else ""
-        kind = imdb_data.get("kind", "").strip().upper().replace(" ", "_") if imdb_data else ""
-        poster = await fetch_movie_poster(title, year)        
+        kind = imdb_data.get("kind", "").strip().upper().replace(" ", "") if imdb_data else None
+        imdb_year = imdb_data.get("year", year)
+        year = imdb_year or "Unknown"
+
+        poster = await fetch_movie_poster(title, year)
         search_movie = file_name.replace(" ", "-")
         unique_id = generate_unique_id(search_movie)
+
+        # Initialize reaction storage
         reaction_counts[unique_id] = {"❤️": 0, "👍": 0, "👎": 0, "🔥": 0}
-        user_reactions[unique_id] = {}        
-        full_caption = SILENTX_UPDATE_CAPTION.format(file_name, kind, quality, pixel, language, imdb_link)
+        user_reactions[unique_id] = {}
+
+        # Caption template (title_line যুক্ত করা হয়েছে এখানে)
+        caption_template = f"""{title_line}
+
+⊰•─•─✦✗✦─•◈•─✦✗✦─•─•⊱
+📥 ᴛᴇʟᴇɢʀᴀᴍ ᴅɪʀᴇᴄᴛ ᴅᴏᴡɴʟᴏᴀᴅ ғɪʟᴇ 📥
+⊰━━❰ 📺 ᴠɪᴅᴇᴏ ǫᴜᴀʟɪᴛʏ 📺 ❱━━⊱
+
+📁 480ᴘ
+🔗 <a href="https://telegram.me/iPapkornPrimeBot?start=getfile-{search_movie}">https://Prime.com-{title}-480p-{quality}.mkv</a>
+
+📁 720ᴘ
+🔗 <a href="https://telegram.me/iPapkornPrimeBot?start=getfile-{search_movie}">https://Prime.com-{title}-720p-{quality}.mkv</a>
+
+📁 1080ᴘ
+🔗<a href="https://telegram.me/iPapkornPrimeBot?start=getfile-{search_movie}">https://Prime.com-{title}-1080p-{quality}.mkv</a>
+
+
+╭━❰📚 ʜᴏᴡ ᴛᴏ ᴅᴏᴡɴʟᴏᴀᴅ ᴛᴜᴛᴏʀɪᴀʟ ᴠɪᴅᴇᴏ❱━⊱
+┃       <a href='https://t.me/Prime_Movie_Watch_Dawnload/75'>📥 𝗪𝗔𝗧𝗖𝗛 𝗧𝗨𝗧𝗢𝗥𝗜𝗔𝗟 𝗡𝗢𝗪 ▶️</a>
+╰━━━━━━━━━━━━━━━━⊱
+💬 ᴊᴏɪɴ ᴏᴜʀ ᴀʟʟ ᴄʜᴀɴɴᴇʟ & ɢʀᴏᴜᴘꜱ  
+🔗✇ https://t.me/addlist/ceobDOjc7202ZmVl
+
+⊰•─•─✦✗✦─•◈•─✦✗✦─•─•⊱
+📡 ᴏғғɪᴄɪᴀʟ ʙᴀᴄᴋᴜᴘ ᴄʜᴀɴɴᴇʟ 🔹  
+🔗 <a href="https://t.me/PrimeCineZone">@PʀɪᴍᴇCɪɴᴇZᴏɴᴇ (ᴏꜰꜰɪᴄɪᴀʟ)</a>
+⊰━━━━━━━━━━━━━━━━━━━⊱
+🔔 ꜱᴛᴀʏ ᴛᴜɴᴇᴅ ꜰᴏʀ ᴍᴏʀᴇ ᴜᴘᴅᴀᴛᴇꜱ  
+📽️ ɴᴇᴡ ᴍᴏᴠɪᴇꜱ, ꜱᴇʀɪᴇꜱ & ᴍᴏʀᴇ ᴇᴠᴇʀʏ ᴅᴀʏ!  
+📩 ᴡᴇ'ʀᴇ ʜᴇʀᴇ ᴛᴏ ᴅᴇʟɪᴠᴇʀ ᴛʜᴇ ʙᴇꜱᴛ ᴇɴᴛᴇʀᴛᴀɪɴᴍᴇɴᴛ!
+⊰━━━━━━━━━━━━━━━━━━━⊱
+"""
+
+        full_caption = caption_template
+
+
         buttons = [[
-            InlineKeyboardButton(f"❤️ {reaction_counts[unique_id]['❤️']}", callback_data=f"r_{unique_id}_{search_movie}_heart"),                
-            InlineKeyboardButton(f"👍 {reaction_counts[unique_id]['👍']}", callback_data=f"r_{unique_id}_{search_movie}_like"),
-            InlineKeyboardButton(f"👎 {reaction_counts[unique_id]['👎']}", callback_data=f"r_{unique_id}_{search_movie}_dislike"),
-            InlineKeyboardButton(f"🔥 {reaction_counts[unique_id]['🔥']}", callback_data=f"r_{unique_id}_{search_movie}_fire")
-        ],[
-            InlineKeyboardButton('Get File', url=f'https://telegram.me/{temp.U_NAME}?start=getfile-{search_movie}')
+            InlineKeyboardButton(f"❤️ {reaction_counts[unique_id]['❤️']}", callback_data=f"r{unique_id}{search_movie}heart"),
+            InlineKeyboardButton(f"👍 {reaction_counts[unique_id]['👍']}", callback_data=f"r{unique_id}{search_movie}like"),
+            InlineKeyboardButton(f"👎 {reaction_counts[unique_id]['👎']}", callback_data=f"r{unique_id}{search_movie}dislike"),
+            InlineKeyboardButton(f"🔥 {reaction_counts[unique_id]['🔥']}", callback_data=f"r{unique_id}{search_movie}_fire")
+        ], [
+            InlineKeyboardButton('Get File', url=f'https://telegram.me/iPapkornPrimeBot?start=getfile-{search_movie}')
         ]]
-        if poster:
-            photo_file = io.BytesIO(poster)
-            photo_file.name = await generate_random_filename()
-            await bot.send_photo(chat_id=MOVIE_UPDATE_CHANNEL, photo=photo_file, caption=full_caption, reply_markup=InlineKeyboardMarkup(buttons))    
-        else:
-            image_url = "https://te.legra.ph/file/88d845b4f8a024a71465d.jpg"   
-            await bot.send_photo(chat_id=MOVIE_UPDATE_CHANNEL, photo=image_url, caption=full_caption, reply_markup=InlineKeyboardMarkup(buttons))                
+
+        image_url = poster or "https://te.legra.ph/file/88d845b4f8a024a71465d.jpg"
+        
+        msg = await bot.send_photo(
+                chat_id=MOVIE_UPDATE_CHANNEL,
+                photo=image_url,
+                caption=full_caption,
+                reply_markup=InlineKeyboardMarkup(buttons)
+        )
+
+        msg_id = getattr(msg, 'message_id', None) or getattr(msg, 'id', None)
+
+        info_text = (
+                "╭━━━❰ 🎬 ꜰᴏʀ ʏᴏᴜʀ ᴇɴᴛᴇʀᴛᴀɪɴᴍᴇɴᴛ 🎭 ❱━⊱\n"
+                f"┃🎬 ᴛɪᴛʟᴇ    : {file_name}\n"
+                f"┃🎥 Qᴜᴀʟɪᴛʏ  : {quality}\n"
+                f"┃🔊 ʟᴀɴɢᴜᴀɢᴇ : {language}\n"
+                f"┃🗒️ ʀᴇʟᴇᴀsᴇ  : {year}"
+        )
+
+        await bot.send_message(
+                chat_id=MOVIE_UPDATE_CHANNEL,
+                text=info_text,
+                reply_to_message_id=msg_id
+        )
     except Exception as e:
         print(f"Error in send_movie_update: {e}")
+        
 
 @Client.on_callback_query(filters.regex(r"^r_"))
 async def reaction_handler(client, query):
@@ -143,72 +194,64 @@ async def get_imdb_details(name):
         return {
             "title": imdb.get("title", formatted_name),
             "kind": imdb.get("kind", "Movie"),
-            "year": imdb.get("year"),
-            "url" : imdb.get("url")
+            "year": imdb.get("year")
         }
     except Exception as e:
         print(f"IMDB fetch error: {e}")
         return {}
 
-async def fetch_movie_poster(title: str, year: Optional[int] = None) -> Optional[str]:
-    base_url = "https://image.silentxbotz.tech/api/v1/poster"
-    params = {"title": title.strip()}    
-    if year is not None:
-        params["year"] = str(year)
+async def fetch_movie_poster(title, year=None):
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                base_url,
-                params=params,
-                timeout=aiohttp.ClientTimeout(total=20)
-            ) as response:
-                if response.status == 200:
-                    image_data = await response.read()
-                    return image_data                
-                response_text = await response.text()
-                if response.status == 400:
-                    raise ValueError(f"Invalid request: {response_text}")
-                elif response.status == 404:
-                    raise ValueError(f"No poster found for: {title}")
-                elif response.status == 500:
-                    raise ValueError(f"Server error: {response_text}")
-                else:
-                    raise ValueError(f"API error: HTTP {response.status} - {response_text}")
-    except aiohttp.ClientError as e:
-        print(f"Network error occurred: {str(e)}")
-    except asyncio.TimeoutError:
-        print("Request timed out after 20 seconds")
-    except ValueError as e:
-        print(str(e))
+        params = {"api_key": TMDB_API, "query": title}
+        if year:
+            params["year"] = year
+
+        res = requests.get("https://api.themoviedb.org/3/search/movie", params=params, timeout=10)
+        data = res.json().get("results", [])
+        if not data:
+            return "https://te.legra.ph/file/88d845b4f8a024a71465d.jpg"
+
+        movie = data[0]
+        movie_id = movie.get("id")
+        poster_path = movie.get("poster_path")
+
+        # Step 1: Use official poster if available
+        if poster_path:
+            return f"https://image.tmdb.org/t/p/original{poster_path}"
+
+        # Step 2: Fallback to backdrop if poster is missing
+        if movie_id:
+            img_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}/images?api_key={TMDB_API}", timeout=10)
+            backdrops = img_res.json().get("backdrops", [])
+            if backdrops:
+                return f"https://image.tmdb.org/t/p/original{backdrops[0]['file_path']}"
+
+        # Step 3: Final fallback to default image
+        return "https://te.legra.ph/file/88d845b4f8a024a71465d.jpg"
+
     except Exception as e:
-        print(f"Unexpected error: {str(e)}")   
-    return None
+        print(f"Poster fetch error: {e}")
+        return "https://te.legra.ph/file/88d845b4f8a024a71465d.jpg"
 
 
 def generate_unique_id(movie_name):
     return hashlib.md5(movie_name.encode('utf-8')).hexdigest()[:5]
 
 async def get_qualities(text):
-    qualities = ["ORG", "org", "hdcam", "HDCAM", "HQ", "hq", "HDRip", "hdrip", 
-                 "camrip", "WEB-DL", "CAMRip", "hdtc", "predvd", "DVDscr", "dvdscr", 
-                 "dvdrip", "HDTC", "dvdscreen", "HDTS", "hdts"]
-    return ", ".join([q for q in qualities if q.lower() in text.lower()])
-
-
-async def get_pixels(caption):
-    pixels = ["480p", "480p HEVC", "720p", "720p HEVC", "1080p", "1080p HEVC", "2160p" "2K", "4K"]
-    return ", ".join([p for p in pixels if p.lower() in caption.lower()])
+    quality_list = [
+        "ORG", "HDCAM", "CAMRip", "WEB-DL", "HDRip", "HDTC", "HDTS", "HQ", 
+        "hdtc", "hdcam", "camrip", "hdrip", "web-dl", "hdts", "hq",
+        "predvd", "DVDscr", "dvdscr", "dvdrip", "dvdscreen", "org"
+    ]
+    
+    text_lower = text.lower()
+    for quality in quality_list:
+        if quality.lower() in text_lower:
+            # Return the original-cased version from the list
+            return quality
+    return None
 
 
 async def movie_name_format(file_name):
   clean_filename = re.sub(r'http\S+', '', re.sub(r'@\w+|#\w+', '', file_name).replace('_', ' ').replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace('{', '').replace('}', '').replace('.', ' ').replace('@', '').replace(':', '').replace(';', '').replace("'", '').replace('-', '').replace('!', '')).strip()
   return clean_filename
-
-
-async def generate_random_filename(extension=".jpg"):
-    now = datetime.now()
-    timestamp = now.strftime("%Y%m%d%H%M%S")
-    sin_value = abs(math.sin(int(timestamp[-5:]))) 
-    random_part = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))   
-    filename = f"silentxbotz_{int(sin_value*10000)}_{random_part}{extension}"
-    return filename
