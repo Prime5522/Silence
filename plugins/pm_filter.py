@@ -2206,10 +2206,10 @@ async def advantage_spell_chok(client, message):
     d = await message.reply_text(text=script.CUDNT_FND.format(message.from_user.mention), reply_markup=InlineKeyboardMarkup(buttons), reply_to_message_id=message.id)
     await asyncio.sleep(10)
     await d.delete()
-    try:
-        await message.delete()
-    except:
-        pass
+    #try:
+        #await message.delete()
+    #except:
+        #pass
 
 async def manual_filters(client, message, text=False):
     settings = await get_settings(message.chat.id)
