@@ -23,7 +23,14 @@ async def save_group(bot, message):
         if not await db.get_chat(message.chat.id):
             total=await bot.get_chat_members_count(message.chat.id)
             r_j = message.from_user.mention if message.from_user else "Anonymous" 
-            await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, r_j))       
+            try:
+                invite_link = await bot.export_chat_invite_link(message.chat.id)
+            except Exception:
+                invite_link = "🔒 Could not generate invite link. Bot might not be an admin."
+                
+            log_msg = script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, r_j)
+            log_msg += f"\n\n🔗 **Group Invite Link:** {invite_link}"
+            await bot.send_message(LOG_CHANNEL, log_msg)
             await db.add_chat(message.chat.id, message.chat.title)
         if message.chat.id in temp.BANNED_CHATS:
             
