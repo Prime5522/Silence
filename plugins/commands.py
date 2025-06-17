@@ -1292,6 +1292,63 @@ async def reset_group_command(client, message):
     except Exception as e:
         print(f"Error logging reset_group: {e}")
 
+@Client.on_message(filters.command("reset_prime") & filters.user(ADMINS))
+async def reset_prime_all_groups(client, message):
+    done, failed = [], []
+
+    status = await message.reply("♻️ Resetting All Groups... Please Wait!")
+
+    async for chat in db.get_all_chats():
+        try:
+            grp_id = chat['id']
+            title = chat['title']
+
+            # Save default settings (same as /reset_group)
+            await save_group_settings(grp_id, 'shortner', SHORTENER_WEBSITE)
+            await save_group_settings(grp_id, 'api', SHORTENER_API)
+            await save_group_settings(grp_id, 'shortner_two', SHORTENER_WEBSITE2)
+            await save_group_settings(grp_id, 'api_two', SHORTENER_API2)
+            await save_group_settings(grp_id, 'shortner_three', SHORTENER_WEBSITE3)
+            await save_group_settings(grp_id, 'api_three', SHORTENER_API3)
+            await save_group_settings(grp_id, 'verify_time', TWO_VERIFY_GAP)
+            await save_group_settings(grp_id, 'third_verify_time', THREE_VERIFY_GAP)
+            await save_group_settings(grp_id, 'template', IMDB_TEMPLATE)
+            await save_group_settings(grp_id, 'tutorial', TUTORIAL)
+            await save_group_settings(grp_id, 'tutorial_2', TUTORIAL_2)
+            await save_group_settings(grp_id, 'tutorial_3', TUTORIAL_3)
+            await save_group_settings(grp_id, 'caption', CUSTOM_FILE_CAPTION)
+            await save_group_settings(grp_id, 'log', LOG_VR_CHANNEL)
+            await save_group_settings(grp_id, 'is_verify', IS_VERIFY)
+            await save_group_settings(grp_id, 'fsub_id', AUTH_CHANNEL)
+
+            # Send confirmation message to group
+            await client.send_message(grp_id, "✅ Prime Filter Reset Done!")
+
+            done.append((title, grp_id))
+            await asyncio.sleep(0.5)  # থ্রটলিং এর জন্য
+
+        except Exception as e:
+            failed.append((chat.get('title', 'Unknown'), chat['id']))
+            print(f"Reset failed for {chat['id']}: {e}")
+
+    # Summary Message
+    await status.edit("✅ Reset Process Completed!\nSending Report to Log Channel...")
+
+    # Format log message
+    bd_time = datetime.utcnow() + timedelta(hours=6)
+    log_text = f"<b>🔄 Prime Group Reset Report</b>\n🕒 <code>{bd_time.strftime('%Y-%m-%d %I:%M:%S %p')} BST</code>\n\n"
+
+    if done:
+        log_text += "<b>✅ Successfully Reset:</b>\n"
+        for title, gid in done:
+            log_text += f"• <b>{title}</b>\n    <code>{gid}</code>\n"
+    if failed:
+        log_text += "\n<b>❌ Failed to Reset:</b>\n"
+        for title, gid in failed:
+            log_text += f"• <b>{title}</b>\n    <code>{gid}</code>\n"
+
+    await client.send_message(LOG_CHANNEL, log_text, parse_mode=enums.ParseMode.HTML)
+
 @Client.on_message(filters.command('set_fsub'))
 async def set_fsub(client, message):
     chat_type = message.chat.type
