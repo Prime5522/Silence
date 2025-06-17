@@ -59,7 +59,7 @@ OWNER_SUPP = environ.get('OWNER_SUPP', 'https://t.me/Prime_Botz_Support')
 AUTH_CHANNEL = int(environ.get('AUTH_CHANNEL', '0')) 
 AUTH_REQ_CHANNEL = int(environ.get('AUTH_REQ_CHANNEL', '0'))
 
-IS_VERIFY = is_enabled('IS_VERIFY', True)
+IS_VERIFY = is_enabled('IS_VERIFY', False)
 LOG_VR_CHANNEL = int(environ.get('LOG_VR_CHANNEL', '-1002196408894')) #Verification Channel Id 
 LOG_API_CHANNEL = int(environ.get('LOG_API_CHANNEL', '-1002196408894')) #If Anyone Set Your Bot In Any Group And Set Shortner In That Group Then In This Channel The All Details Come
 VERIFY_IMG = environ.get("VERIFY_IMG", "https://i.ibb.co/Qv8KXPML/photo-2025-04-20-06-27-44-7495278325967880200.jpg")
@@ -89,7 +89,7 @@ NO_RESULTS_MSG = bool(environ.get("NO_RESULTS_MSG", True))
 MAX_B_TN = environ.get("MAX_B_TN", "8")
 MAX_BTN = is_enabled((environ.get('MAX_BTN', "True")), True)
 PORT = environ.get("PORT", "8080")
-MSG_ALRT = environ.get('MSG_ALRT', 'Pᴏᴡᴇʀᴇᴅ ʙʏ: @Pʀɪᴍᴇ_Bᴏᴛᴢ ♥️')
+MSG_ALRT = environ.get('MSG_ALRT', 'Pᴏᴡᴇʀᴇᴅ ʙʏ: @Pʀɪᴍᴇ_Bᴏᴛᴢ 💙')
 SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'https://t.me/Prime_Botz_Support') #Support Chat Link with https://
 P_TTI_SHOW_OFF = is_enabled((environ.get('P_TTI_SHOW_OFF', "False")), False)
 IMDB = is_enabled((environ.get('IMDB', "False")), False)
