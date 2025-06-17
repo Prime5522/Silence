@@ -1294,16 +1294,24 @@ async def reset_group_command(client, message):
 
 @Client.on_message(filters.command("reset_prime") & filters.user(ADMINS))
 async def reset_prime_all_groups(client, message):
+    chats = await db.get_all_chats()
+    total = len(chats)
     done, failed = [], []
 
-    status = await message.reply("♻️ Resetting All Groups... Please Wait!")
+    status_msg = await message.reply_text(
+        f"♻️ <b>Resetting Group Settings...</b>\n\n"
+        f"✅ <b>Total Groups:</b> <code>{total}</code>\n"
+        f"🔄 <b>Processing:</b> <code>0</code>\n"
+        f"✅ <b>Done:</b> <code>0</code>\n"
+        f"❌ <b>Failed:</b> <code>0</code>"
+    )
 
-    async for chat in db.get_all_chats():
+    for count, chat in enumerate(chats, 1):
         try:
             grp_id = chat['id']
-            title = chat['title']
+            title = chat.get('title', 'Unknown')
 
-            # Save default settings (same as /reset_group)
+            # রিসেট সেটিংস
             await save_group_settings(grp_id, 'shortner', SHORTENER_WEBSITE)
             await save_group_settings(grp_id, 'api', SHORTENER_API)
             await save_group_settings(grp_id, 'shortner_two', SHORTENER_WEBSITE2)
@@ -1321,20 +1329,26 @@ async def reset_prime_all_groups(client, message):
             await save_group_settings(grp_id, 'is_verify', IS_VERIFY)
             await save_group_settings(grp_id, 'fsub_id', AUTH_CHANNEL)
 
-            # Send confirmation message to group
-            await client.send_message(grp_id, "✅ Prime Filter Reset Done!")
-
+            # ✅ গ্রুপে ইনফো পাঠানো
+            await client.send_message(grp_id, "✅ Prime Filter Settings has been Reset!")
             done.append((title, grp_id))
-            await asyncio.sleep(0.5)  # থ্রটলিং এর জন্য
 
         except Exception as e:
             failed.append((chat.get('title', 'Unknown'), chat['id']))
-            print(f"Reset failed for {chat['id']}: {e}")
+            print(f"[FAILED] {chat['id']}: {e}")
 
-    # Summary Message
-    await status.edit("✅ Reset Process Completed!\nSending Report to Log Channel...")
+        # 🔄 Status Message Update
+        await status_msg.edit_text(
+            f"♻️ <b>Resetting Group Settings...</b>\n\n"
+            f"✅ <b>Total Groups:</b> <code>{total}</code>\n"
+            f"🔄 <b>Processing:</b> <code>{count}</code>\n"
+            f"✅ <b>Done:</b> <code>{len(done)}</code>\n"
+            f"❌ <b>Failed:</b> <code>{len(failed)}</code>"
+        )
 
-    # Format log message
+        await asyncio.sleep(0.5)
+
+    # 🔚 সবশেষে রিপোর্ট
     bd_time = datetime.utcnow() + timedelta(hours=6)
     log_text = f"<b>🔄 Prime Group Reset Report</b>\n🕒 <code>{bd_time.strftime('%Y-%m-%d %I:%M:%S %p')} BST</code>\n\n"
 
@@ -1347,7 +1361,13 @@ async def reset_prime_all_groups(client, message):
         for title, gid in failed:
             log_text += f"• <b>{title}</b>\n    <code>{gid}</code>\n"
 
-    await client.send_message(LOG_CHANNEL, log_text, parse_mode=enums.ParseMode.HTML)
+    await status_msg.edit_text("✅ Reset Completed!\n\nSending Report to Logs...")
+
+    await client.send_message(
+        LOG_CHANNEL,
+        log_text,
+        parse_mode=enums.ParseMode.HTML
+    )
 
 @Client.on_message(filters.command('set_fsub'))
 async def set_fsub(client, message):
