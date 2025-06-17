@@ -1294,24 +1294,40 @@ async def reset_group_command(client, message):
 
 @Client.on_message(filters.command("reset_prime") & filters.user(ADMINS))
 async def reset_prime_all_groups(client, message):
-    chats = await db.get_all_chats()
+    try:
+        chats = await db.get_all_chats()
+    except Exception as e:
+        return await message.reply_text(f"❌ <b>DB Error:</b> <code>{e}</code>")
+
     total = len(chats)
-    done, failed = [], []
+    done, failed, skipped = [], [], []
 
     status_msg = await message.reply_text(
         f"♻️ <b>Resetting Group Settings...</b>\n\n"
         f"✅ <b>Total Groups:</b> <code>{total}</code>\n"
         f"🔄 <b>Processing:</b> <code>0</code>\n"
         f"✅ <b>Done:</b> <code>0</code>\n"
-        f"❌ <b>Failed:</b> <code>0</code>"
+        f"❌ <b>Failed:</b> <code>0</code>\n"
+        f"⏭️ <b>Skipped:</b> <code>0</code>"
     )
 
     for count, chat in enumerate(chats, 1):
-        try:
-            grp_id = chat['id']
-            title = chat.get('title', 'Unknown')
+        grp_id = chat['id']
+        title = chat.get('title', 'Unknown')
 
-            # রিসেট সেটিংস
+        try:
+            # চেক করা যায় এই বট গ্রুপে এড আছে কি না
+            try:
+                chat_member = await client.get_chat_member(grp_id, 'me')
+                if not chat_member.status in ["administrator", "member"]:
+                    skipped.append((title, grp_id))
+                    continue
+            except Exception as e:
+                skipped.append((title, grp_id))
+                print(f"⚠️ Skipped group {grp_id} due to get_chat_member error: {e}")
+                continue
+
+            # গ্রুপ সেটিংস রিসেট
             await save_group_settings(grp_id, 'shortner', SHORTENER_WEBSITE)
             await save_group_settings(grp_id, 'api', SHORTENER_API)
             await save_group_settings(grp_id, 'shortner_two', SHORTENER_WEBSITE2)
@@ -1329,45 +1345,63 @@ async def reset_prime_all_groups(client, message):
             await save_group_settings(grp_id, 'is_verify', IS_VERIFY)
             await save_group_settings(grp_id, 'fsub_id', AUTH_CHANNEL)
 
-            # ✅ গ্রুপে ইনফো পাঠানো
-            await client.send_message(grp_id, "✅ Prime Filter Settings has been Reset!")
+            # গ্রুপে Success মেসেজ
+            try:
+                await client.send_message(grp_id, "✅ <b>Prime Filter Settings has been Reset!</b>", parse_mode=enums.ParseMode.HTML)
+            except Exception as msg_error:
+                print(f"⚠️ Message send failed for {grp_id}: {msg_error}")
+
             done.append((title, grp_id))
 
         except Exception as e:
-            failed.append((chat.get('title', 'Unknown'), chat['id']))
-            print(f"[FAILED] {chat['id']}: {e}")
+            failed.append((title, grp_id))
+            print(f"❌ Failed to reset group {grp_id} ({title}): {e}")
 
-        # 🔄 Status Message Update
-        await status_msg.edit_text(
-            f"♻️ <b>Resetting Group Settings...</b>\n\n"
-            f"✅ <b>Total Groups:</b> <code>{total}</code>\n"
-            f"🔄 <b>Processing:</b> <code>{count}</code>\n"
-            f"✅ <b>Done:</b> <code>{len(done)}</code>\n"
-            f"❌ <b>Failed:</b> <code>{len(failed)}</code>"
-        )
+        # স্ট্যাটাস মেসেজ আপডেট
+        try:
+            await status_msg.edit_text(
+                f"♻️ <b>Resetting Group Settings...</b>\n\n"
+                f"✅ <b>Total Groups:</b> <code>{total}</code>\n"
+                f"🔄 <b>Processing:</b> <code>{count}</code>\n"
+                f"✅ <b>Done:</b> <code>{len(done)}</code>\n"
+                f"❌ <b>Failed:</b> <code>{len(failed)}</code>\n"
+                f"⏭️ <b>Skipped:</b> <code>{len(skipped)}</code>"
+            )
+        except:
+            pass
 
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.7)
 
-    # 🔚 সবশেষে রিপোর্ট
+    # 🔚 শেষ রিপোর্ট
     bd_time = datetime.utcnow() + timedelta(hours=6)
     log_text = f"<b>🔄 Prime Group Reset Report</b>\n🕒 <code>{bd_time.strftime('%Y-%m-%d %I:%M:%S %p')} BST</code>\n\n"
 
     if done:
         log_text += "<b>✅ Successfully Reset:</b>\n"
         for title, gid in done:
-            log_text += f"• <b>{title}</b>\n    <code>{gid}</code>\n"
+            log_text += f"• <b>{title}</b> - <code>{gid}</code>\n"
+
+    if skipped:
+        log_text += "\n<b>⏭️ Skipped (Bot not in group/admin):</b>\n"
+        for title, gid in skipped:
+            log_text += f"• <b>{title}</b> - <code>{gid}</code>\n"
+
     if failed:
         log_text += "\n<b>❌ Failed to Reset:</b>\n"
         for title, gid in failed:
-            log_text += f"• <b>{title}</b>\n    <code>{gid}</code>\n"
+            log_text += f"• <b>{title}</b> - <code>{gid}</code>\n"
 
     await status_msg.edit_text("✅ Reset Completed!\n\nSending Report to Logs...")
 
-    await client.send_message(
-        LOG_CHANNEL,
-        log_text,
-        parse_mode=enums.ParseMode.HTML
-    )
+    try:
+        await client.send_message(
+            LOG_CHANNEL,
+            log_text,
+            parse_mode=enums.ParseMode.HTML
+        )
+    except Exception as e:
+        print(f"❌ Failed to send log report: {e}")
+        await message.reply(f"✅ Reset Done, But log send failed: {e}")
 
 @Client.on_message(filters.command('set_fsub'))
 async def set_fsub(client, message):
