@@ -1292,6 +1292,91 @@ async def reset_group_command(client, message):
     except Exception as e:
         print(f"Error logging reset_group: {e}")
 
+@Client.on_message(filters.command("reset_prime") & filters.user(ADMINS))
+async def reset_prime_all_groups(client, message):
+    try:
+        await message.reply("♻️ <b>Resetting all saved groups...</b>")
+
+        total = 0
+        success = 0
+        failed = 0
+        success_groups = []
+        failed_groups = []
+
+        # Try to fetch all chats
+        try:
+            chats = await db.get_all_chats()
+        except Exception as e:
+            print(f"❌ Failed to get chats from DB: {e}")
+            return await message.reply("❌ <b>Couldn't fetch chat list from database.</b>")
+
+        async for chat in chats:
+            total += 1
+            grp_id = chat["id"]
+            grp_title = chat["title"]
+
+            try:
+                await save_group_settings(grp_id, 'shortner', SHORTENER_WEBSITE)
+                await save_group_settings(grp_id, 'api', SHORTENER_API)
+                await save_group_settings(grp_id, 'shortner_two', SHORTENER_WEBSITE2)
+                await save_group_settings(grp_id, 'api_two', SHORTENER_API2)
+                await save_group_settings(grp_id, 'shortner_three', SHORTENER_WEBSITE3)
+                await save_group_settings(grp_id, 'api_three', SHORTENER_API3)
+                await save_group_settings(grp_id, 'verify_time', TWO_VERIFY_GAP)
+                await save_group_settings(grp_id, 'third_verify_time', THREE_VERIFY_GAP)
+                await save_group_settings(grp_id, 'template', IMDB_TEMPLATE)
+                await save_group_settings(grp_id, 'tutorial', TUTORIAL)
+                await save_group_settings(grp_id, 'tutorial_2', TUTORIAL_2)
+                await save_group_settings(grp_id, 'tutorial_3', TUTORIAL_3)
+                await save_group_settings(grp_id, 'caption', CUSTOM_FILE_CAPTION)
+                await save_group_settings(grp_id, 'log', LOG_VR_CHANNEL)
+                await save_group_settings(grp_id, 'is_verify', IS_VERIFY)
+                await save_group_settings(grp_id, 'fsub_id', AUTH_CHANNEL)
+
+                print(f"✅ Successfully reset: {grp_title} ({grp_id})")
+                success += 1
+                success_groups.append((grp_title, grp_id))
+
+            except Exception as e:
+                print(f"❌ Error at group {grp_title} ({grp_id}): {e}")
+                failed += 1
+                failed_groups.append((grp_title, grp_id))
+
+        # Final message log format
+        final_log = f"🔄 <b>Global Group Reset Summary</b>\n\n"
+        final_log += f"👤 <b>By:</b> <a href='tg://user?id={message.from_user.id}'>{message.from_user.mention}</a>\n"
+        final_log += f"🧮 <b>Total Groups:</b> <code>{total}</code>\n"
+        final_log += f"✅ <b>Success:</b> <code>{success}</code>\n"
+        final_log += f"❌ <b>Failed:</b> <code>{failed}</code>\n\n"
+
+        if success_groups:
+            final_log += "✅ <b>Successfully Reset Groups:</b>\n"
+            for name, gid in success_groups:
+                final_log += f"🔹 <b>{name}</b> - <code>{gid}</code>\n"
+
+        if failed_groups:
+            final_log += "\n❌ <b>Failed to Reset:</b>\n"
+            for name, gid in failed_groups:
+                final_log += f"🔸 <b>{name}</b> - <code>{gid}</code>\n"
+
+        # Send to LOG_CHANNEL
+        try:
+            await client.send_message(
+                LOG_CHANNEL,
+                final_log,
+                parse_mode=enums.ParseMode.HTML,
+                disable_web_page_preview=True
+            )
+        except Exception as e:
+            print(f"❌ Couldn't send log to LOG_CHANNEL: {e}")
+
+        await message.reply(f"✅ <b>Group reset completed.</b>\n<b>Total:</b> {total} | ✅ Success: {success} | ❌ Failed: {failed}")
+
+    except Exception as e:
+        print(f"❌ Unexpected Error in reset_prime_all_groups: {e}")
+        await message.reply("⚠️ <b>Something went wrong during the reset process.</b>")
+        
+
 @Client.on_message(filters.command('set_fsub'))
 async def set_fsub(client, message):
     chat_type = message.chat.type
