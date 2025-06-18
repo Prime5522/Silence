@@ -1295,7 +1295,13 @@ async def reset_group_command(client, message):
 @Client.on_message(filters.command("reset_prime") & filters.user(ADMINS))
 async def reset_prime_all_groups(client, message):
     try:
-        await message.reply("♻️ <b>Resetting all saved groups...</b>")
+        # Step 1: Show processing loop video
+        processing_msg = await message.reply_video(
+            video="https://files.catbox.moe/38745o.mp4",
+            caption="♻️ <b>Resetting all saved groups, please wait...</b>",
+            parse_mode=enums.ParseMode.HTML,
+            supports_streaming=True
+        )
 
         total = 0
         success = 0
@@ -1308,6 +1314,7 @@ async def reset_prime_all_groups(client, message):
             chats = await db.get_all_chats()
         except Exception as e:
             print(f"❌ Failed to get chats from DB: {e}")
+            await processing_msg.delete()
             return await message.reply("❌ <b>Couldn't fetch chat list from database.</b>")
 
         async for chat in chats:
@@ -1342,6 +1349,12 @@ async def reset_prime_all_groups(client, message):
                 failed += 1
                 failed_groups.append((grp_title, grp_id))
 
+        # Step 2: Delete the processing video
+        try:
+            await processing_msg.delete()
+        except Exception as e:
+            print(f"❌ Couldn't delete processing video: {e}")
+
         # Final message log format
         final_log = f"🔄 <b>Global Group Reset Summary</b>\n\n"
         final_log += f"👤 <b>By:</b> <a href='tg://user?id={message.from_user.id}'>{message.from_user.mention}</a>\n"
@@ -1370,12 +1383,16 @@ async def reset_prime_all_groups(client, message):
         except Exception as e:
             print(f"❌ Couldn't send log to LOG_CHANNEL: {e}")
 
-        await message.reply(f"✅ <b>Group reset completed.</b>\n<b>Total:</b> {total} | ✅ Success: {success} | ❌ Failed: {failed}")
+        # Final message to command user
+        await message.reply(
+            f"✅ <b>Group reset completed.</b>\n<b>Total:</b> {total} | ✅ Success: {success} | ❌ Failed: {failed}",
+            parse_mode=enums.ParseMode.HTML
+        )
 
     except Exception as e:
         print(f"❌ Unexpected Error in reset_prime_all_groups: {e}")
         await message.reply("⚠️ <b>Something went wrong during the reset process.</b>")
-        
+
 
 @Client.on_message(filters.command('set_fsub'))
 async def set_fsub(client, message):
