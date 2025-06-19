@@ -1274,12 +1274,12 @@ async def reset_group_command(client, message):
         group_link = f"<a href='https://t.me/c/{str(grp_id)[4:]}/1'>{group_title}</a>" if str(grp_id).startswith("-100") else group_title
 
         log_text = (
-            f"🔄 <b>Group Settings Reset</b>\n\n"
-            f"👤 <b>By:</b> <a href='tg://user?id={user.id}'>{user.mention}</a>\n"
-            f"💬 <b>Group:</b> {group_link}\n"
-            f"🆔 <b>Group ID:</b> <code>{grp_id}</code>\n"
-            f"🕒 <b>Time:</b> <code>{bd_time.strftime('%Y-%m-%d %I:%M:%S %p')} (BST)</code>\n\n"
-            f"✅ <i>All settings have been reset to default.</i>"
+            f"🔄 <b>ɢʀᴏᴜᴘ sᴇᴛᴛɪɴɢs ʀᴇsᴇᴛ</b>\n\n"
+            f"👤 <bʙʏ:</b> <a href='tg://user?id={user.id}'>{user.mention}</a>\n"
+            f"💬 <b>ɢʀᴏᴜᴘ:</b> {group_link}\n"
+            f"🆔 <b>ɢʀᴏᴜᴘ ɪᴅ:</b> <code>{grp_id}</code>\n"
+            f"🕒 <b>ᴛɪᴍᴇ:</b> <code>{bd_time.strftime('%Y-%m-%d %I:%M:%S %p')} (BST)</code>\n\n"
+            f"✅ <i>ᴀʟʟ sᴇᴛᴛɪɴɢs ʜᴀᴠᴇ ʙᴇᴇɴ ʀᴇsᴇᴛ ᴛᴏ ᴅᴇꜰᴀᴜʟᴛ.</i>"
         )
 
         await client.send_message(
@@ -1292,13 +1292,13 @@ async def reset_group_command(client, message):
     except Exception as e:
         print(f"Error logging reset_group: {e}")
 
-@Client.on_message(filters.command("reset_primep") & filters.user(ADMINS))
+@Client.on_message(filters.command("reset_prime") & filters.user(ADMINS))
 async def reset_prime_all_groups(client, message):
     try:
         # Step 1: Show processing loop video
         processing_msg = await message.reply_video(
-            video="https://files.catbox.moe/38745o.mp4",
-            caption="♻️ <b>Resetting all saved groups, please wait...</b>",
+            video="https://files.catbox.moe/h7oao5.mp4",
+            caption="♻️ <b>ʀᴇꜱᴇᴛᴛɪɴɢ ᴀʟʟ sᴀᴠᴇᴅ ɢʀᴏᴜᴘs.., ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ...</b>",
             parse_mode=enums.ParseMode.HTML,
             supports_streaming=True
         )
@@ -1315,7 +1315,7 @@ async def reset_prime_all_groups(client, message):
         except Exception as e:
             print(f"❌ Failed to get chats from DB: {e}")
             await processing_msg.delete()
-            return await message.reply("❌ <b>Couldn't fetch chat list from database.</b>")
+            return await message.reply("❌ <b>ᴄᴏᴜʟᴅɴ'ᴛ ꜰᴇᴛᴄʜ ᴄʜᴀᴛ ʟɪsᴛ ꜰʀᴏᴍ ᴅᴀᴛᴀʙᴀsᴇ.</b>")
 
         async for chat in chats:
             total += 1
@@ -1340,12 +1340,12 @@ async def reset_prime_all_groups(client, message):
                 await save_group_settings(grp_id, 'is_verify', IS_VERIFY)
                 await save_group_settings(grp_id, 'fsub_id', AUTH_CHANNEL)
 
-                print(f"✅ Successfully reset: {grp_title} ({grp_id})")
+                print(f"✅ sᴜᴄᴄᴇssꜰᴜʟʟʏ ʀᴇsᴇᴛ: {grp_title} ({grp_id})")
                 success += 1
                 success_groups.append((grp_title, grp_id))
 
             except Exception as e:
-                print(f"❌ Error at group {grp_title} ({grp_id}): {e}")
+                print(f"❌ ᴇʀʀᴏʀ ᴀᴛ ɢʀᴏᴜᴘ {grp_title} ({grp_id}): {e}")
                 failed += 1
                 failed_groups.append((grp_title, grp_id))
 
@@ -1353,22 +1353,22 @@ async def reset_prime_all_groups(client, message):
         try:
             await processing_msg.delete()
         except Exception as e:
-            print(f"❌ Couldn't delete processing video: {e}")
+            print(f"❌ ᴄᴏᴜʟᴅɴ'ᴛ ᴅᴇʟᴇᴛᴇ ᴘʀᴏᴄᴇssɪɴɢ ᴠɪᴅᴇᴏ: {e}")
 
         # Final message log format
-        final_log = f"🔄 <b>Global Group Reset Summary</b>\n\n"
-        final_log += f"👤 <b>By:</b> <a href='tg://user?id={message.from_user.id}'>{message.from_user.mention}</a>\n"
-        final_log += f"🧮 <b>Total Groups:</b> <code>{total}</code>\n"
-        final_log += f"✅ <b>Success:</b> <code>{success}</code>\n"
-        final_log += f"❌ <b>Failed:</b> <code>{failed}</code>\n\n"
+        final_log = f"🔄 <b>ɢʟᴏʙᴀʟ ɢʀᴏᴜᴘ ʀᴇsᴇᴛ sᴜᴍᴍᴀʀʏ</b>\n\n"
+        final_log += f"👤 <b>ʙʏ:</b> <a href='tg://user?id={message.from_user.id}'>{message.from_user.mention}</a>\n"
+        final_log += f"🧮 <b>ᴛᴏᴛᴀʟ ɢʀᴏᴜᴘs:</b> <code>{total}</code>\n"
+        final_log += f"✅ <b>sᴜᴄᴄᴇss:</b> <code>{success}</code>\n"
+        final_log += f"❌ <b>ꜰᴀɪʟᴇᴅ:</b> <code>{failed}</code>\n\n"
 
         if success_groups:
-            final_log += "✅ <b>Successfully Reset Groups:</b>\n"
+            final_log += "✅ <b>sᴜᴄᴄᴇssꜰᴜʟʟʏ ʀᴇsᴇᴛ ɢʀᴏᴜᴘs:</b>\n"
             for name, gid in success_groups:
                 final_log += f"🔹 <b>{name}</b> - <code>{gid}</code>\n"
 
         if failed_groups:
-            final_log += "\n❌ <b>Failed to Reset:</b>\n"
+            final_log += "\n❌ <b>ꜰᴀɪʟᴇᴅ ᴛᴏ ʀᴇsᴇᴛ:</b>\n"
             for name, gid in failed_groups:
                 final_log += f"🔸 <b>{name}</b> - <code>{gid}</code>\n"
 
@@ -1381,161 +1381,17 @@ async def reset_prime_all_groups(client, message):
                 disable_web_page_preview=True
             )
         except Exception as e:
-            print(f"❌ Couldn't send log to LOG_CHANNEL: {e}")
+            print(f"❌ ᴄᴏᴜʟᴅɴ'ᴛ sᴇɴᴅ ʟᴏɢ ᴛᴏ LOG_CHANNEL: {e}")
 
         # Final message to command user
         await message.reply(
-            f"✅ <b>Group reset completed.</b>\n<b>Total:</b> {total} | ✅ Success: {success} | ❌ Failed: {failed}",
+            f"✅ <b>ɢʀᴏᴜᴘ ʀᴇsᴇᴛ ᴄᴏᴍᴘʟᴇᴛᴇᴅ.</b>\n\n<b>ᴛᴏᴛᴀʟ ɢʀᴏᴜᴘs:</b> {total} |\n\n✅ sᴜᴄᴄᴇss: {success} |\n\n❌ ꜰᴀɪʟᴇᴅ: {failed}",
             parse_mode=enums.ParseMode.HTML
         )
 
     except Exception as e:
         print(f"❌ Unexpected Error in reset_prime_all_groups: {e}")
-        await message.reply("⚠️ <b>Something went wrong during the reset process.</b>")
-
-
-@Client.on_message(filters.command("reset_prime") & filters.user(ADMINS))
-async def ask_custom_reset_message(client, message: Message):
-    buttons = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("✅ Yes, I want to send message", callback_data="reset_confirm_yes"),
-            InlineKeyboardButton("❌ No, just reset settings", callback_data="reset_confirm_no")
-        ]
-    ])
-
-    await message.reply(
-        "<b>Do you want to send a custom message to each group during reset?</b>\n\n"
-        "If yes, you'll be asked to type the message before the reset starts.",
-        reply_markup=buttons,
-        parse_mode=enums.ParseMode.HTML
-    )
-
-
-@Client.on_callback_query(filters.regex("reset_confirm_yes"))
-async def custom_msg_input(client, callback_query: CallbackQuery):
-    await callback_query.message.delete()
-    await callback_query.message.reply(
-        "<b>Please type the custom message you want to send to each group during the reset process.</b>\n\n"
-        "Once you send the message, the reset will begin automatically.",
-        parse_mode=enums.ParseMode.HTML
-    )
-
-    reset_states[callback_query.from_user.id] = True
-
-
-@Client.on_callback_query(filters.regex("reset_confirm_no"))
-async def reset_without_custom_message(client, callback_query: CallbackQuery):
-    await callback_query.message.delete()
-    await reset_prime_all_groups(client, callback_query.message, custom_text=None)
-
-
-@Client.on_message(filters.text & filters.user(ADMINS))
-async def handle_custom_message_input(client, message: Message):
-    if reset_states.get(message.from_user.id):
-        reset_states.pop(message.from_user.id)
-        await reset_prime_all_groups(client, message, custom_text=message.text)
-
-
-async def reset_prime_all_groups(client, message, custom_text=None):
-    try:
-        processing_msg = await message.reply_video(
-            video="https://files.catbox.moe/38745o.mp4",
-            caption="♻️ <b>Resetting all saved groups, please wait...</b>",
-            parse_mode=enums.ParseMode.HTML,
-            supports_streaming=True
-        )
-
-        total = 0
-        success = 0
-        failed = 0
-        success_groups = []
-        failed_groups = []
-
-        try:
-            chats = await db.get_all_chats()
-        except Exception as e:
-            print(f"❌ DB error: {e}")
-            await processing_msg.delete()
-            return await message.reply("❌ <b>Failed to get chat list from database.</b>")
-
-        async for chat in chats:
-            total += 1
-            grp_id = chat["id"]
-            grp_title = chat["title"]
-
-            try:
-                await save_group_settings(grp_id, 'shortner', SHORTENER_WEBSITE)
-                await save_group_settings(grp_id, 'api', SHORTENER_API)
-                await save_group_settings(grp_id, 'shortner_two', SHORTENER_WEBSITE2)
-                await save_group_settings(grp_id, 'api_two', SHORTENER_API2)
-                await save_group_settings(grp_id, 'shortner_three', SHORTENER_WEBSITE3)
-                await save_group_settings(grp_id, 'api_three', SHORTENER_API3)
-                await save_group_settings(grp_id, 'verify_time', TWO_VERIFY_GAP)
-                await save_group_settings(grp_id, 'third_verify_time', THREE_VERIFY_GAP)
-                await save_group_settings(grp_id, 'template', IMDB_TEMPLATE)
-                await save_group_settings(grp_id, 'tutorial', TUTORIAL)
-                await save_group_settings(grp_id, 'tutorial_2', TUTORIAL_2)
-                await save_group_settings(grp_id, 'tutorial_3', TUTORIAL_3)
-                await save_group_settings(grp_id, 'caption', CUSTOM_FILE_CAPTION)
-                await save_group_settings(grp_id, 'log', LOG_VR_CHANNEL)
-                await save_group_settings(grp_id, 'is_verify', IS_VERIFY)
-                await save_group_settings(grp_id, 'fsub_id', AUTH_CHANNEL)
-
-                if custom_text:
-                    try:
-                        await client.send_message(grp_id, custom_text)
-                    except Exception as msg_err:
-                        print(f"⚠️ Failed to send custom message to {grp_title} ({grp_id}): {msg_err}")
-
-                success += 1
-                success_groups.append((grp_title, grp_id))
-
-            except Exception as e:
-                print(f"❌ Error at group {grp_title} ({grp_id}): {e}")
-                failed += 1
-                failed_groups.append((grp_title, grp_id))
-
-        try:
-            await processing_msg.delete()
-        except Exception as e:
-            print(f"❌ Couldn't delete processing video: {e}")
-
-        # Final log summary
-        final_log = f"🔄 <b>Group Reset Summary</b>\n\n"
-        final_log += f"👤 <b>By:</b> <a href='tg://user?id={message.from_user.id}'>{message.from_user.mention}</a>\n"
-        final_log += f"📊 <b>Total Groups:</b> <code>{total}</code>\n"
-        final_log += f"✅ <b>Success:</b> <code>{success}</code>\n"
-        final_log += f"❌ <b>Failed:</b> <code>{failed}</code>\n\n"
-
-        if success_groups:
-            final_log += "✅ <b>Reset Done:</b>\n"
-            for name, gid in success_groups:
-                final_log += f"🔹 <b>{name}</b> - <code>{gid}</code>\n"
-
-        if failed_groups:
-            final_log += "\n❌ <b>Failed Resets:</b>\n"
-            for name, gid in failed_groups:
-                final_log += f"🔸 <b>{name}</b> - <code>{gid}</code>\n"
-
-        try:
-            await client.send_message(
-                LOG_CHANNEL,
-                final_log,
-                parse_mode=enums.ParseMode.HTML,
-                disable_web_page_preview=True
-            )
-        except Exception as e:
-            print(f"❌ Couldn't send summary to LOG_CHANNEL: {e}")
-
-        await message.reply(
-            f"✅ <b>Reset Completed</b>\n<b>Total:</b> {total} | ✅ Success: {success} | ❌ Failed: {failed}",
-            parse_mode=enums.ParseMode.HTML
-        )
-
-    except Exception as e:
-        print(f"❌ Unexpected error: {e}")
-        await message.reply("⚠️ <b>Something went wrong during the reset process.</b>")
-
+        await message.reply("⚠️ <b>sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ ᴅᴜʀɪɴɢ ᴛʜᴇ ʀᴇsᴇᴛ ᴘʀᴏᴄᴇss.</b>")
                                                                  
 @Client.on_message(filters.command('set_fsub'))
 async def set_fsub(client, message):
