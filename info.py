@@ -53,7 +53,7 @@ CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/PrimeCineZone')
 OWNER_LNK = environ.get('OWNER_LNK', 'https://t.me/Prime_Nayem')
 UPDATE_CHANNEL_LNK = environ.get('UPDATE_CHANNEL_LNK', 'https://t.me/PrimeXBots')
 OWNER_BOTZ = environ.get('OWNER_BOTZ', 'https://t.me/Prime_Admin_Support_ProBot')
-OWNER_SUPP = environ.get('OWNER_SUPP', 'https://t.me/Prime_Botz_Support')
+OWNER_SUPP = environ.get('OWNER_SUPP', 'https://t.me/Prime_Support_Group')
 
 #Force Subscription Channel (Put Same Channel Id In Both Veriables)
 AUTH_CHANNEL = int(environ.get('AUTH_CHANNEL', '0')) 
