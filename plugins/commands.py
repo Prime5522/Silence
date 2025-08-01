@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 TIMEZONE = "Asia/Kolkata"
 BATCH_FILES = {}
 
-EXTRA_CHANNEL = -1002043502363
+#EXTRA_CHANNEL = -1002043502363
 EXTRA_CHANNELP = -1002245813234
 EXTRA_CHANNELQ = -1002323796637
 
@@ -234,14 +234,14 @@ async def start(client, message):
                     return
     
         # ✅ চ্যানেল 2 - EXTRA_CHANNEL
-        if not await is_subscribed(client, message.from_user.id, EXTRA_CHANNEL):
-            try:
-                chat_extra = await client.get_chat(EXTRA_CHANNEL)
-                invite_extra = await client.create_chat_invite_link(EXTRA_CHANNEL)
-                btn.append([InlineKeyboardButton(f"✇ ᴊᴏɪɴ {chat_extra.title} ✇", url=invite_extra.invite_link)])
-            except ChatAdminRequired:
-                logger.error("Make sure Bot is admin in EXTRA_CHANNEL")
-                return
+        #if not await is_subscribed(client, message.from_user.id, EXTRA_CHANNEL):
+            #try:
+                #chat_extra = await client.get_chat(EXTRA_CHANNEL)
+                #invite_extra = await client.create_chat_invite_link(EXTRA_CHANNEL)
+                #btn.append([InlineKeyboardButton(f"✇ ᴊᴏɪɴ {chat_extra.title} ✇", url=invite_extra.invite_link)])
+            #except ChatAdminRequired:
+                #logger.error("Make sure Bot is admin in EXTRA_CHANNEL")
+                #return
 
         # ✅ চ্যানেল 3 - EXTRA_CHANNELP
         if not await is_subscribed(client, message.from_user.id, EXTRA_CHANNELP):
