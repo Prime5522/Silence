@@ -317,7 +317,7 @@ async def start(client, message):
                     msg = script.SECOND_VERIFICATION_TEXT if is_second_shortener else script.VERIFICATION_TEXT
                 n=await m.reply_text(
                     text=msg.format(message.from_user.mention),
-                    protect_content = True,
+                    protect_content = False,
                     reply_markup=reply_markup,
                     parse_mode=enums.ParseMode.HTML
                 )
