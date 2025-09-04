@@ -165,7 +165,7 @@ class script(object):
 💎 Want direct access without verification? Upgrade to Premium!
 (ভেরিফিকেশন ছাড়াই সরাসরি ফাইল পেতে চান? প্রিমিয়ামে আপগ্রেড করুন!)
 💶 Send /plan to buy a subscription. (সাবস্ক্রিপশন কিনতে /plan লিখুন।)</b>"""
-
+    
     VERIFY_COMPLETE_TEXT = """<b>👋 Hey {},
 
 🎉 Your 1st Verification is SUCCESSFULLY COMPLETED!
