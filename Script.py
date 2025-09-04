@@ -177,8 +177,8 @@ class script(object):
 👇 Click Here To Get File 👇
 (এখানে ক্লিক করে আপনার কাঙ্ক্ষিত ফাইলটি পান।)
 
-⏳ This free access is valid for the next <code>{}</code>.
-(এই ফ্রি অ্যাক্সেসটি আগামী <code>{}</code> এর জন্য বৈধ।)
+⏳ This free access is valid for the next 8 hours.
+(এই ফ্রি অ্যাক্সেসটি আগামী ৮ ঘন্টা এর জন্য বৈধ।)
 
 💎 For uninterrupted service, upgrade to Premium anytime!
 (নিরবচ্ছিন্ন সার্ভিসের জন্য, যেকোনো সময় প্রিমিয়ামে আপগ্রেড করুন!)
@@ -214,8 +214,8 @@ class script(object):
 👇 Click Here To Get File 👇
 (এখানে ক্লিক করে আপনার কাঙ্ক্ষিত ফাইলটি পান।)
 
-⏳ This free access is valid for the next <code>{}</code>.
-(এই ফ্রি অ্যাক্সেসটি আগামী <code>{}</code> এর জন্য বৈধ।)
+⏳ This free access is valid for the next 8 hours.
+(এই ফ্রি অ্যাক্সেসটি আগামী ৮ ঘন্টা এর জন্য বৈধ।)
 
 💎 For uninterrupted service, upgrade to Premium anytime!
 (নিরবচ্ছিন্ন সার্ভিসের জন্য, যেকোনো সময় প্রিমিয়ামে আপগ্রেড করুন!)
@@ -251,11 +251,13 @@ class script(object):
 👇 Click Here To Get File 👇
 (এখানে ক্লিক করে আপনার কাঙ্ক্ষিত ফাইলটি পান।)
 
+⏳ This free access is valid for the next 8 hours.
+(এই ফ্রি অ্যাক্সেসটি আগামী ৮ ঘন্টা এর জন্য বৈধ।)
+
 💎 For uninterrupted service, upgrade to Premium anytime!
 (নিরবচ্ছিন্ন সার্ভিসের জন্য, যেকোনো সময় প্রিমিয়ামে আপগ্রেড করুন!)
 👉 Click /plan to upgrade to Premium. (প্রিমিয়ামে আপগ্রেড করতে /plan এ ক্লিক করুন।)</b>"""
     
-
 
     VERIFIED_LOG_TEXT = """ᴜꜱᴇʀ ᴠᴇʀɪꜰɪᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ @iPapkornprimebot ✓
 
