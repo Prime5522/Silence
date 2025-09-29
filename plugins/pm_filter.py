@@ -2600,8 +2600,7 @@ async def global_filters(client, message, text=False):
 
 
 
-
-@app.on_callback_query()
+@Client.on_callback_query()
 async def cb_handlerr(client, query):
     user_id = query.from_user.id
     if query.data == "closes":
