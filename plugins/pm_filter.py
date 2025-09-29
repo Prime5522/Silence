@@ -1489,6 +1489,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ],[
                 InlineKeyboardButton("• Mᴏᴠɪᴇs Cʜᴀɴɴᴇʟ •", url=CHNL_LNK),
                 InlineKeyboardButton("• ᴀʙᴏᴜᴛ •", callback_data="bot")
+			],[
+                InlineKeyboardButton('• sᴏᴜʀᴄᴇ •', callback_data='source_prime')
             ],[
                 InlineKeyboardButton("⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋", callback_data="start")
             ]]
@@ -1768,7 +1770,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "bot":
         buttons = [[
             InlineKeyboardButton('‼️ ᴅɪꜱᴄʟᴀɪᴍᴇʀ ‼️', callback_data='disclaimer'),
-            InlineKeyboardButton ('• sᴏᴜʀᴄᴇ •', url=OWNER_BOTZ),
+            InlineKeyboardButton ('• sᴏᴜʀᴄᴇ •', callback_data='source_prime'),
         ],[
             InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
         ]]
@@ -1781,7 +1783,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
     elif query.data == "source":
         buttons = [[
-            InlineKeyboardButton('ꜱᴏᴜʀᴄᴇ ᴄᴏᴅᴇ 📜', url=OWNER_BOTZ),
+            InlineKeyboardButton('ꜱᴏᴜʀᴄᴇ ᴄᴏᴅᴇ 📜', callback_data='source_prime'),
             InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
@@ -2599,3 +2601,38 @@ async def global_filters(client, message, text=False):
 
 
 
+@app.on_callback_query()
+async def cb_handlerr(client, query):
+    user_id = query.from_user.id
+    if query.data == "closes":
+        try:
+            await query.message.delete()
+        except Exception:
+            await query.answer("⚠️ Cannot delete message.", show_alert=True)
+        return  # exit early
+
+    elif query.data == "source_prime":   # ← নতুন callback_data
+        try:
+            # প্রথমে আগের মেসেজ ডিলিট হবে
+            await query.message.delete()
+        except Exception:
+            pass
+
+        # এখন নতুন করে ছবি + ক্যাপশন পাঠানো হবে
+        await query.message.reply_photo(
+            photo="https://i.postimg.cc/hvFZ93Ct/file-000000004188623081269b2440872960.png",
+            caption=(
+                f"👋 Hello Dear 👋,\n\n"
+                "⚠️ ᴛʜɪꜱ ʙᴏᴛ ɪꜱ ᴀ ᴘʀɪᴠᴀᴛᴇ ꜱᴏᴜʀᴄᴇ ᴘʀᴏᴊᴇᴄᴛ\n\n"
+                "ᴛʜɪs ʙᴏᴛ ʜᴀs ʟᴀsᴛᴇsᴛ ᴀɴᴅ ᴀᴅᴠᴀɴᴄᴇᴅ ꜰᴇᴀᴛᴜʀᴇs⚡️\n"
+                "▸ ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ꜱᴏᴜʀᴄᴇ ᴄoᴅᴇ oʀ ʟɪᴋᴇ ᴛʜɪꜱ ʙᴏᴛ ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ..!\n"
+                "▸ ɪ ᴡɪʟʟ ᴄʀᴇᴀᴛᴇ ᴀ ʙᴏᴛ ꜰᴏʀ ʏᴏᴜ oʀ ꜱᴏᴜʀᴄᴇ ᴄoᴅᴇ\n"
+                "⇒ ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ - ♚ ᴀᴅᴍɪɴ ♚."
+            ),
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [InlineKeyboardButton("♚ ᴀᴅᴍɪɴ ♚", url="https://t.me/Prime_Admin_Support_ProBot")],
+                    [InlineKeyboardButton("• ᴄʟᴏsᴇ •", callback_data="closes")]
+                ]
+            )
+		)
