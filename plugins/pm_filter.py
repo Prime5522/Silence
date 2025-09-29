@@ -1766,12 +1766,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
-                    
-    elif query.data == "bot":
+
+
+	elif query.data == "bot":
         buttons = [[
             InlineKeyboardButton('‼️ ᴅɪꜱᴄʟᴀɪᴍᴇʀ ‼️', callback_data='disclaimer'),
-            InlineKeyboardButton ("• sᴏᴜʀᴄᴇ •", callback_data="source"),
-        ],[
+            InlineKeyboardButton("• sᴏᴜʀᴄᴇ •", callback_data="source"),
+        ], [
             InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
@@ -1781,18 +1782,18 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.HTML
         )
 
-	elif query.data == "source":
-    # আগে পুরনো মেসেজ ডিলিট করুন
+    elif query.data == "source":
+        # আগে পুরনো মেসেজ ডিলিট করুন
         await query.message.delete()
 
-    # ইনলাইন বাটন তৈরি
+        # ইনলাইন বাটন তৈরি
         buttons = [[
             InlineKeyboardButton('♚ ᴀᴅᴍɪɴ ♚', url='https://t.me/Prime_Admin_Support_ProBot'),
             InlineKeyboardButton('🚫 ᴄʟᴏꜱᴇ 🚫', callback_data='close_data')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
 
-    # নতুন টেক্সট
+        # নতুন টেক্সট
         text_msg = (
             "👋 Hello Dear 👋,\n\n"
             "⚠️ ᴛʜɪꜱ ʙᴏᴛ ɪꜱ ᴀ ᴘʀɪᴠᴀᴛᴇ ꜱᴏᴜʀᴄᴇ ᴘʀᴏᴊᴇᴄᴛ\n\n"
@@ -1802,29 +1803,19 @@ async def cb_handler(client: Client, query: CallbackQuery):
             "⇒ ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ - ♚ ᴀᴅᴍɪɴ ♚."
         )
 
-    # নতুন মেসেজে ছবি + টেক্সট + বাটন পাঠানো
+        # নতুন মেসেজে ছবি + টেক্সট + বাটন পাঠানো
         await query.message.chat.send_photo(
             photo="https://i.postimg.cc/hvFZ93Ct/file-000000004188623081269b2440872960.png",
             caption=text_msg,
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
-    )
-        
-    elif query.data == "source11":
-        buttons = [[
-            InlineKeyboardButton('ꜱᴏᴜʀᴄᴇ ᴄᴏᴅᴇ 📜', callback_data='source_prime'),
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='bot')
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.SOURCE_TXT,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
         )
 
     elif query.data == "ref_point":
-        await query.answer(f'You Have: {referdb.get_refer_points(query.from_user.id)} Refferal points.', show_alert=True)
-    
+        await query.answer(
+            f'You Have: {referdb.get_refer_points(query.from_user.id)} Refferal points.',
+            show_alert=True
+		)
     
     elif query.data == "disclaimer":
             btn = [[
