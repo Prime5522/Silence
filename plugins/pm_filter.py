@@ -1490,7 +1490,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton("• Mᴏᴠɪᴇs Cʜᴀɴɴᴇʟ •", url=CHNL_LNK),
                 InlineKeyboardButton("• ᴀʙᴏᴜᴛ •", callback_data="bot")
 			],[
-                InlineKeyboardButton ("• sᴏᴜʀᴄᴇ •", callback_data="source")
+                InlineKeyboardButton ("🧑‍💻 sᴏᴜʀᴄᴇ ᴄoᴅᴇ 🧑‍💻", callback_data="source")
             ],[
                 InlineKeyboardButton("⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋", callback_data="start")
             ]]
@@ -1771,7 +1771,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "bot":
         buttons = [[
             InlineKeyboardButton('‼️ ᴅɪꜱᴄʟᴀɪᴍᴇʀ ‼️', callback_data='disclaimer'),
-            InlineKeyboardButton("• sᴏᴜʀᴄᴇ •", callback_data="source"),
+            InlineKeyboardButton("🧑‍💻 sᴏᴜʀᴄᴇ ᴄoᴅᴇ 🧑‍💻", callback_data="source"),
         ], [
             InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
         ]]
@@ -1785,10 +1785,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
 	
     elif query.data == "source":
         await query.message.delete()
-        buttons = [[
-            InlineKeyboardButton('♚ ᴀᴅᴍɪɴ ♚', url='https://t.me/Prime_Admin_Support_ProBot'),
-            InlineKeyboardButton('🚫 ᴄʟᴏꜱᴇ 🚫', callback_data='close_data')
-        ]]
+		buttons = [
+            [InlineKeyboardButton('♚ ᴀᴅᴍɪɴ ♚', url='https://t.me/Prime_Admin_Support_ProBot')],
+            [InlineKeyboardButton('🚫 ᴄʟᴏꜱᴇ 🚫', callback_data='close_data')]
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
         text_msg = (
             "👋 Hello Dear 👋,\n\n"
