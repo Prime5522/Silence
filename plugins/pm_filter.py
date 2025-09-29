@@ -1768,7 +1768,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
 
-	elif query.data == "bot":
+    elif query.data == "bot":
         buttons = [[
             InlineKeyboardButton('‼️ ᴅɪꜱᴄʟᴀɪᴍᴇʀ ‼️', callback_data='disclaimer'),
             InlineKeyboardButton("• sᴏᴜʀᴄᴇ •", callback_data="source"),
@@ -1783,17 +1783,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
 
     elif query.data == "source":
-        # আগে পুরনো মেসেজ ডিলিট করুন
         await query.message.delete()
-
-        # ইনলাইন বাটন তৈরি
         buttons = [[
             InlineKeyboardButton('♚ ᴀᴅᴍɪɴ ♚', url='https://t.me/Prime_Admin_Support_ProBot'),
             InlineKeyboardButton('🚫 ᴄʟᴏꜱᴇ 🚫', callback_data='close_data')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-
-        # নতুন টেক্সট
         text_msg = (
             "👋 Hello Dear 👋,\n\n"
             "⚠️ ᴛʜɪꜱ ʙᴏᴛ ɪꜱ ᴀ ᴘʀɪᴠᴀᴛᴇ ꜱᴏᴜʀᴄᴇ ᴘʀᴏᴊᴇᴄᴛ\n\n"
@@ -1802,8 +1797,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             "▸ ɪ ᴡɪʟʟ ᴄʀᴇᴀᴛᴇ ᴀ ʙᴏᴛ ꜰᴏʀ ʏᴏᴜ oʀ ꜱᴏᴜʀᴄᴇ ᴄoᴅᴇ\n"
             "⇒ ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ - ♚ ᴀᴅᴍɪɴ ♚."
         )
-
-        # নতুন মেসেজে ছবি + টেক্সট + বাটন পাঠানো
         await query.message.chat.send_photo(
             photo="https://i.postimg.cc/hvFZ93Ct/file-000000004188623081269b2440872960.png",
             caption=text_msg,
@@ -1815,18 +1808,20 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.answer(
             f'You Have: {referdb.get_refer_points(query.from_user.id)} Refferal points.',
             show_alert=True
-		)
-    
+        )
+
     elif query.data == "disclaimer":
-            btn = [[
-                    InlineKeyboardButton("⇋ ʙᴀᴄᴋ ⇋", callback_data="bot")
-                  ]]
-            reply_markup = InlineKeyboardMarkup(btn)
-            await query.message.edit_text(
-                text=(script.DISCLAIMER_TXT),
-                reply_markup=reply_markup,
-                parse_mode=enums.ParseMode.HTML 
-            )
+        btn = [[
+            InlineKeyboardButton("⇋ ʙᴀᴄᴋ ⇋", callback_data="bot")
+        ]]
+        reply_markup = InlineKeyboardMarkup(btn)
+        await query.message.edit_text(
+            text=script.DISCLAIMER_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+    
+    
     elif query.data.startswith("setgs"):
         ident, set_type, status, grp_id = query.data.split("#")
         userid = query.from_user.id if query.from_user else None
