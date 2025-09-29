@@ -1782,7 +1782,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.HTML
         )
 
-	elif query.data == "source":
+	
+    elif query.data == "source":
         await query.message.delete()
         buttons = [[
             InlineKeyboardButton('♚ ᴀᴅᴍɪɴ ♚', url='https://t.me/Prime_Admin_Support_ProBot'),
@@ -1798,27 +1799,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             "⇒ ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ - ♚ ᴀᴅᴍɪɴ ♚."
         )
         await query.message.reply_photo(
-            photo="https://i.postimg.cc/hvFZ93Ct/file-000000004188623081269b2440872960.png",
-            caption=text_msg,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-    	)
-    elif query.data == "sourcees":
-        await query.message.delete()
-        buttons = [[
-            InlineKeyboardButton('♚ ᴀᴅᴍɪɴ ♚', url='https://t.me/Prime_Admin_Support_ProBot'),
-            InlineKeyboardButton('🚫 ᴄʟᴏꜱᴇ 🚫', callback_data='close_data')
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        text_msg = (
-            "👋 Hello Dear 👋,\n\n"
-            "⚠️ ᴛʜɪꜱ ʙᴏᴛ ɪꜱ ᴀ ᴘʀɪᴠᴀᴛᴇ ꜱᴏᴜʀᴄᴇ ᴘʀᴏᴊᴇᴄᴛ\n\n"
-            "ᴛʜɪs ʙᴏᴛ ʜᴀs ʟᴀsᴛᴇsᴛ ᴀɴᴅ ᴀᴅᴠᴀɴᴄᴇᴅ ꜰᴇᴀᴛᴜʀᴇs⚡️\n"
-            "▸ ɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ꜱᴏᴜʀᴄᴇ ᴄoᴅᴇ oʀ ʟɪᴋᴇ ᴛʜɪꜱ ʙᴏᴛ ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ..!\n"
-            "▸ ɪ ᴡɪʟʟ ᴄʀᴇᴀᴛᴇ ᴀ ʙᴏᴛ ꜰᴏʀ ʏᴏᴜ oʀ ꜱᴏᴜʀᴄᴇ ᴄoᴅᴇ\n"
-            "⇒ ᴄᴏɴᴛᴀᴄᴛ ᴍᴇ - ♚ ᴀᴅᴍɪɴ ♚."
-        )
-        await query.message.chat.send_photo(
             photo="https://i.postimg.cc/hvFZ93Ct/file-000000004188623081269b2440872960.png",
             caption=text_msg,
             reply_markup=reply_markup,
