@@ -1782,10 +1782,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.HTML
         )
 
-	
+
     elif query.data == "source":
         await query.message.delete()
-		buttons = [
+        buttons = [
             [InlineKeyboardButton('♚ ᴀᴅᴍɪɴ ♚', url='https://t.me/Prime_Admin_Support_ProBot')],
             [InlineKeyboardButton('🚫 ᴄʟᴏꜱᴇ 🚫', callback_data='close_data')]
         ]
@@ -1803,8 +1803,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             caption=text_msg,
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
-        )
-
+		)
     elif query.data == "ref_point":
         await query.answer(
             f'You Have: {referdb.get_refer_points(query.from_user.id)} Refferal points.',
