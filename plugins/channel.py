@@ -53,7 +53,7 @@ async def media(bot, message):
 
 async def send_movie_update(bot, file_name, caption):
     try:
-        # 1. Generate Smart Link Slug (Based on your NEW Logic)
+        # 1. Generate Smart Link Slug
         link_slug = await get_smart_link_slug(file_name)
         unique_id = generate_unique_id(link_slug)
         
@@ -68,7 +68,7 @@ async def send_movie_update(bot, file_name, caption):
         notified_movies[unique_id] = current_time
         movie_slugs[unique_id] = link_slug
 
-        # 3. Prepare Search Query (For TMDB Poster)
+        # 3. Prepare Search Query (Strict Mode)
         clean_name = re.sub(r'\.\w+$', '', file_name)
         clean_name = re.sub(r'https?://\S+|@\w+', '', clean_name)
         year_match = re.search(r"\b(19|20)\d{2}\b", clean_name)
@@ -81,11 +81,12 @@ async def send_movie_update(bot, file_name, caption):
 
         search_query = await clean_search_query(search_query)
 
-        # 4. Fetch TMDB Data
+        # 4. Fetch TMDB Data (With Verification)
         tmdb_data = await fetch_tmdb_data(search_query, year)
         
         display_name = await clean_display_name(file_name)
         
+        # Fallback: If TMDB has no title, use clean filename
         title = tmdb_data.get("title", display_name)
         overview = tmdb_data.get("overview", "")
         rating = tmdb_data.get("vote_average", "N/A")
@@ -104,7 +105,8 @@ async def send_movie_update(bot, file_name, caption):
         full_caption = "#𝑵𝒆𝒘_𝑪𝒐𝒏𝒕𝒆𝒏𝒕_𝑨𝒅𝒅𝒆𝒅 💌\n━━━━━━━━━━━━━━━━━\n"
         full_caption += f"📂 <b>File:</b> {display_name}\n━━━━━━━━━━━━━━━━━\n"
         
-        if overview and len(overview) > 10:
+        # Only show storyline if we actually found a valid movie match
+        if poster and overview and len(overview) > 10:
             short_overview = overview[:300] + "..." if len(overview) > 300 else overview
             full_caption += f"📝 <b>Storyline:</b>\n{short_overview}\n━━━━━━━━━━━━━━━━━\n"
 
@@ -187,18 +189,10 @@ async def reaction_handler(client, query):
 # --- Helper Functions ---
 
 async def get_smart_link_slug(filename):
-    """
-    New Logic:
-    1. Checks first 3 words.
-    2. If Year found within first 3 words -> Take words up to Year.
-    3. If No Year -> Take first 3 words only.
-    """
-    # 1. Basic Clean (Remove extensions, websites)
+    """Link generation logic"""
     clean = re.sub(r'\.\w+$', '', filename)
     clean = re.sub(r'https?://\S+|@\w+', '', clean)
     
-    # 2. Remove specific junk to get clear words
-    # Keeping English letters and numbers only for splitting
     clean_text = re.sub(r'[^a-zA-Z0-9\s]', ' ', clean)
     clean_text = re.sub(r'\s+', ' ', clean_text).strip()
     
@@ -206,24 +200,17 @@ async def get_smart_link_slug(filename):
     selected_words = []
     
     found_year = False
-    # Check strictly within first 3 words
     for i in range(min(len(words), 3)):
         word = words[i]
-        # Check if word is a year (19xx or 20xx)
         if re.match(r'^(19|20)\d{2}$', word):
-            # If year found, take everything up to this year
             selected_words = words[:i+1]
             found_year = True
             break
             
     if not found_year:
-        # If no year in first 3 words, just take first 3 words
         selected_words = words[:3]
 
-    # Join back and finalize slug
     base_slug = "-".join(selected_words)
-    
-    # Final Safety Clean (just in case)
     final_slug = re.sub(r'[^a-zA-Z0-9\-]', '', base_slug)
     return final_slug
 
@@ -231,15 +218,16 @@ async def clean_search_query(text):
     """Clean text for TMDB Search"""
     text = re.sub(r'[._\-\(\)\[\]\{\}]', ' ', text)
     text = re.sub(r'\b(S\d+|Season\s*\d+|Ep?\d+)\b', '', text, flags=re.IGNORECASE)
-    junk = r'\b(Download|Downlo|Complete|Netflix|Amazon|Prime|Hulu|Hotstar|Series|Movie|Official|Dubbed|Dual|Audio|Sub|ESub)\b'
+    junk = r'\b(Download|Downlo|Complete|Netflix|Amazon|Prime|Hulu|Hotstar|Series|Movie|Official|Dubbed|Dual|Audio|Sub|ESub|NF|AV1|Vista|AAC|AAC5\.1)\b'
     text = re.sub(junk, '', text, flags=re.IGNORECASE)
     return re.sub(r'\s{2,}', ' ', text).strip()
 
 async def clean_display_name(filename):
-    """Clean text for Channel Post Display"""
+    """Clean text for Channel Post Display - More strict"""
     name = re.sub(r'\.\w+$', '', filename)
     name = re.sub(r'https?://\S+|@\w+', '', name)
-    unwanted = r'\b(?:1080p|720p|480p|2160p|4k|5k|HEVC|WEB-DL|BluRay|HDRip|HDTC|HDTS|CAMRip|HDCAM|DVDRip|DVDScr|WEBRip|x264|x265|10bit|60fps|AAC|5\.1|Dual|Audio|Multi|Sub|ESub|Line|GB|MB|KB|Downlo|Download|Netflix|Amazon)\b'
+    # Added NF, AV1, Vista, AAC, AAC5.1 to unwanted list
+    unwanted = r'\b(?:1080p|720p|480p|2160p|4k|5k|HEVC|WEB-DL|BluRay|HDRip|HDTC|HDTS|CAMRip|HDCAM|DVDRip|DVDScr|WEBRip|x264|x265|10bit|60fps|AAC|AAC5\.1|5\.1|Dual|Audio|Multi|Sub|ESub|Line|GB|MB|KB|Downlo|Download|Netflix|Amazon|NF|AV1|ViSTA|V2|PROPER)\b'
     name = re.sub(unwanted, '', name, flags=re.IGNORECASE)
     name = re.sub(r'\b\d+(\.\d+)?\b(?=\s*$)', '', name)
     name = re.sub(r'[\[\(\{\]\)\}]', '', name)
@@ -264,23 +252,53 @@ async def get_qualities(text):
     return None
 
 async def fetch_tmdb_data(query, year=None):
+    """
+    STRICT Verification Logic Added.
+    If query is 'Deva', result 'Devara' will be REJECTED.
+    """
     try:
         params = {"api_key": TMDB_API, "query": query}
         if year: params["year"] = year
         res = requests.get("https://api.themoviedb.org/3/search/movie", params=params, timeout=5)
         results = res.json().get("results", [])
+        
         if not results: return {}
-        movie = results[0]
-        movie_id = movie.get("id")
+        
+        # --- NEW VERIFICATION LOGIC ---
+        # We iterate through results to find a 'True' match
+        matched_movie = None
+        
+        for movie in results:
+            title = movie.get("title", "")
+            
+            # Logic: The Query word must exist as a WHOLE WORD in the Result Title.
+            # Example: Query "Deva" -> Result "Devara" (No match for whole word 'Deva') -> REJECTED
+            # Example: Query "Iron Man" -> Result "Iron Man 3" -> ACCEPTED
+            
+            # Using Regex word boundary \b
+            if re.search(r'\b' + re.escape(query) + r'\b', title, re.IGNORECASE):
+                matched_movie = movie
+                break
+        
+        # If no strict match found in results, return empty (don't show wrong poster)
+        if not matched_movie:
+            # Optional: If you want to be less strict, you can just return empty dict
+            # ensuring NO poster is sent if name doesn't match.
+            return {} 
+            
+        movie_id = matched_movie.get("id")
         details_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API}", timeout=5)
         details = details_res.json()
-        poster_path = details.get("poster_path") or movie.get("poster_path")
+        
+        poster_path = details.get("poster_path") or matched_movie.get("poster_path")
         backdrop_path = details.get("backdrop_path")
         image_url = None
         if poster_path: image_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
         elif backdrop_path: image_url = f"https://image.tmdb.org/t/p/w500{backdrop_path}"
+        
         genres_list = [g["name"] for g in details.get("genres", [])]
         genres_str = ", ".join(genres_list[:2])
+        
         return {
             "title": details.get("title"),
             "overview": details.get("overview"),
