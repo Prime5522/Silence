@@ -8,19 +8,23 @@ from pyrogram import Client, filters
 from database.ia_filterdb import save_file
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
-# Advanced Language Mapping
+# 1. UPDATED FULL LANGUAGE MAP
 LANG_MAP = {
-    "hi": "Hindi", "hin": "Hindi",
-    "en": "English", "eng": "English",
-    "bn": "Bengali", "ban": "Bengali", "ben": "Bengali",
-    "tm": "Tamil", "tam": "Tamil",
-    "te": "Telugu", "tel": "Telugu",
-    "ml": "Malayalam", "mal": "Malayalam",
-    "kn": "Kannada", "kan": "Kannada",
-    "mr": "Marathi", "pa": "Punjabi",
-    "gu": "Gujarati", "ko": "Korean",
-    "ja": "Japanese", "es": "Spanish",
-    "fr": "French", "ur": "Urdu",
+    "hi": "Hindi", "hin": "Hindi", "hindi": "Hindi",
+    "en": "English", "eng": "English", "english": "English",
+    "bn": "Bengali", "ban": "Bengali", "ben": "Bengali", "bengali": "Bengali",
+    "tm": "Tamil", "tam": "Tamil", "tamil": "Tamil",
+    "te": "Telugu", "tel": "Telugu", "telugu": "Telugu",
+    "ml": "Malayalam", "mal": "Malayalam", "malayalam": "Malayalam",
+    "kn": "Kannada", "kan": "Kannada", "kannada": "Kannada",
+    "mr": "Marathi", "marathi": "Marathi",
+    "pa": "Punjabi", "punjabi": "Punjabi",
+    "gu": "Gujarati", "gujarati": "Gujarati",
+    "ko": "Korean", "korean": "Korean",
+    "ja": "Japanese", "japanese": "Japanese",
+    "es": "Spanish", "spanish": "Spanish",
+    "fr": "French", "french": "French",
+    "ur": "Urdu", "urdu": "Urdu",
     "dual": "Dual Audio", "multi": "Multi Audio"
 }
 
@@ -53,11 +57,10 @@ async def media(bot, message):
 
 async def send_movie_update(bot, file_name, caption):
     try:
-        # 1. Generate Smart Link Slug
+        # --- 1. Smart Link & 5-Day Check ---
         link_slug = await get_smart_link_slug(file_name)
         unique_id = generate_unique_id(link_slug)
         
-        # 2. CHECK: 5-Day Limit Logic
         current_time = datetime.now()
         if unique_id in notified_movies:
             last_posted_time = notified_movies[unique_id]
@@ -68,7 +71,7 @@ async def send_movie_update(bot, file_name, caption):
         notified_movies[unique_id] = current_time
         movie_slugs[unique_id] = link_slug
 
-        # 3. Prepare Search Query (Strict Mode)
+        # --- 2. Smart Search Query ---
         clean_name = re.sub(r'\.\w+$', '', file_name)
         clean_name = re.sub(r'https?://\S+|@\w+', '', clean_name)
         year_match = re.search(r"\b(19|20)\d{2}\b", clean_name)
@@ -81,55 +84,66 @@ async def send_movie_update(bot, file_name, caption):
 
         search_query = await clean_search_query(search_query)
 
-        # 4. Fetch TMDB Data (With Verification)
+        # --- 3. Fetch Data ---
         tmdb_data = await fetch_tmdb_data(search_query, year)
         
         display_name = await clean_display_name(file_name)
         
-        # Fallback: If TMDB has no title, use clean filename
         title = tmdb_data.get("title", display_name)
         overview = tmdb_data.get("overview", "")
-        rating = tmdb_data.get("vote_average", "N/A")
-        genres = tmdb_data.get("genres", "Movie")
+        rating = tmdb_data.get("vote_average", 0)
+        genres = tmdb_data.get("genres", "")
         poster = tmdb_data.get("poster")
         tmdb_year = tmdb_data.get("release_date", year or "N/A")[:4]
         
-        language = await get_formatted_language(caption)
-        quality = await get_qualities(caption) or "HDRip"
+        language = await get_formatted_language(file_name, caption)
+        quality = await get_qualities(caption)
 
         if unique_id not in reaction_counts:
             reaction_counts[unique_id] = {"❤️": 0, "👍": 0, "👎": 0, "🔥": 0}
             user_reactions[unique_id] = {}
 
-        # 5. Construct Caption
-        full_caption = "#𝑵𝒆𝒘_𝑪𝒐𝒏𝒕𝒆𝒏𝒕_𝑨𝒅𝒅𝒆𝒅 💌\n━━━━━━━━━━━━━━━━━\n"
-        full_caption += f"📂 <b>File:</b> {display_name}\n━━━━━━━━━━━━━━━━━\n"
+        # --- 4. DESIGN SECTION (DESIGN 1: CINEMATIC BOX) ---
         
-        # Only show storyline if we actually found a valid movie match
+        # Header
+        full_caption = f"⚡️ <b>{title} ({tmdb_year})</b>\n\n"
+        
+        # Start Box
+        full_caption += "╭─❮ <b>ᴍᴏᴠɪᴇ ɪɴꜰᴏ</b> ❯───\n"
+        
+        # Box Content (Conditional)
+        if genres: 
+            full_caption += f"│ 🎭 <b>Genre:</b> {genres}\n"
+        if rating and str(rating) != "0" and str(rating) != "0.0":
+            full_caption += f"│ ⭐️ <b>Rating:</b> {rating}/10\n"
+        if quality:
+            full_caption += f"│ 💿 <b>Quality:</b> {quality}\n"
+        if language != "Unknown":
+            full_caption += f"│ 🔊 <b>Language:</b> {language}\n"
+            
+        # End Box
+        full_caption += "╰───────────────\n\n"
+        
+        # Storyline (Conditional)
         if poster and overview and len(overview) > 10:
-            short_overview = overview[:300] + "..." if len(overview) > 300 else overview
-            full_caption += f"📝 <b>Storyline:</b>\n{short_overview}\n━━━━━━━━━━━━━━━━━\n"
+            short_overview = overview[:250] + "..." if len(overview) > 250 else overview
+            full_caption += f"📝 <b>Storyline:</b>\n{short_overview}\n\n"
+        
+        # File Name
+        full_caption += f"📂 <b>File:</b> <code>{display_name}</code>\n"
+        
+        # Footer
+        full_caption += "━━━━━━━━━━━━━━━━━\n"
+        full_caption += "👇 <b>Get This File Below</b> 👇"
 
-        full_caption += (
-            "╭───────────────╮\n"
-            f"│ 🎭 <b>Genre:</b> {genres}\n"
-            f"│ 📅 <b>Year:</b> {tmdb_year}\n"
-            f"│ 🔊 <b>Language:</b> {language}\n"
-            f"│ 💿 <b>Quality:</b> {quality}\n"
-            f"│ 🌟 <b>Rating:</b> {rating}/10\n"
-            "╰───────────────╯\n\n"
-        )
-
-        full_caption += "𝐓𝐨 𝐚𝐜𝐜𝐞𝐬𝐬 𝐭𝐡𝐢𝐬 𝐜𝐨𝐧𝐭𝐞𝐧𝐭, 𝐩𝐥𝐞𝐚𝐬𝐞 𝐜𝐥𝐢𝐜𝐤 𝐭𝐡𝐞 𝐆𝐞𝐭 𝐅𝐢𝐥𝐞 💌 𝐛𝐮𝐭𝐭𝐨𝐧 𝐛𝐞𝐥𝐨𝐰\n━━━━━━━━━━━━━━━━━"
-
-        # 6. Buttons
+        # --- 5. Buttons ---
         buttons = [[
             InlineKeyboardButton(f"❤️ {reaction_counts[unique_id]['❤️']}", callback_data=f"r_{unique_id}_h"),
             InlineKeyboardButton(f"👍 {reaction_counts[unique_id]['👍']}", callback_data=f"r_{unique_id}_l"),
             InlineKeyboardButton(f"👎 {reaction_counts[unique_id]['👎']}", callback_data=f"r_{unique_id}_d"),
             InlineKeyboardButton(f"🔥 {reaction_counts[unique_id]['🔥']}", callback_data=f"r_{unique_id}_f")
         ], [
-            InlineKeyboardButton('💌 Get File 🍿', url=f'https://telegram.me/{temp.U_NAME}?start=getfile-{link_slug}')
+            InlineKeyboardButton('📂 Get File 📂', url=f'https://telegram.me/{temp.U_NAME}?start=getfile-{link_slug}')
         ]]
 
         if poster:
@@ -156,7 +170,7 @@ async def reaction_handler(client, query):
         
         link_slug = movie_slugs.get(unique_id)
         if not link_slug:
-            await query.answer("Old post data expired.", show_alert=True)
+            await query.answer("Bot restarted, link expired.", show_alert=True)
             return
 
         if unique_id not in reaction_counts:
@@ -180,7 +194,7 @@ async def reaction_handler(client, query):
             InlineKeyboardButton(f"👎 {reaction_counts[unique_id]['👎']}", callback_data=f"r_{unique_id}_d"),
             InlineKeyboardButton(f"🔥 {reaction_counts[unique_id]['🔥']}", callback_data=f"r_{unique_id}_f")
         ],[
-            InlineKeyboardButton('💌 Get File 🍿', url=f'https://telegram.me/{temp.U_NAME}?start=getfile-{link_slug}')
+            InlineKeyboardButton('📂 Get File 📂', url=f'https://telegram.me/{temp.U_NAME}?start=getfile-{link_slug}')
         ]]
         await query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(updated_buttons))
     except Exception as e:
@@ -189,16 +203,12 @@ async def reaction_handler(client, query):
 # --- Helper Functions ---
 
 async def get_smart_link_slug(filename):
-    """Link generation logic"""
     clean = re.sub(r'\.\w+$', '', filename)
     clean = re.sub(r'https?://\S+|@\w+', '', clean)
-    
     clean_text = re.sub(r'[^a-zA-Z0-9\s]', ' ', clean)
     clean_text = re.sub(r'\s+', ' ', clean_text).strip()
-    
     words = clean_text.split()
     selected_words = []
-    
     found_year = False
     for i in range(min(len(words), 3)):
         word = words[i]
@@ -206,16 +216,13 @@ async def get_smart_link_slug(filename):
             selected_words = words[:i+1]
             found_year = True
             break
-            
     if not found_year:
         selected_words = words[:3]
-
     base_slug = "-".join(selected_words)
     final_slug = re.sub(r'[^a-zA-Z0-9\-]', '', base_slug)
     return final_slug
 
 async def clean_search_query(text):
-    """Clean text for TMDB Search"""
     text = re.sub(r'[._\-\(\)\[\]\{\}]', ' ', text)
     text = re.sub(r'\b(S\d+|Season\s*\d+|Ep?\d+)\b', '', text, flags=re.IGNORECASE)
     junk = r'\b(Download|Downlo|Complete|Netflix|Amazon|Prime|Hulu|Hotstar|Series|Movie|Official|Dubbed|Dual|Audio|Sub|ESub|NF|AV1|Vista|AAC|AAC5\.1)\b'
@@ -223,10 +230,8 @@ async def clean_search_query(text):
     return re.sub(r'\s{2,}', ' ', text).strip()
 
 async def clean_display_name(filename):
-    """Clean text for Channel Post Display - More strict"""
     name = re.sub(r'\.\w+$', '', filename)
     name = re.sub(r'https?://\S+|@\w+', '', name)
-    # Added NF, AV1, Vista, AAC, AAC5.1 to unwanted list
     unwanted = r'\b(?:1080p|720p|480p|2160p|4k|5k|HEVC|WEB-DL|BluRay|HDRip|HDTC|HDTS|CAMRip|HDCAM|DVDRip|DVDScr|WEBRip|x264|x265|10bit|60fps|AAC|AAC5\.1|5\.1|Dual|Audio|Multi|Sub|ESub|Line|GB|MB|KB|Downlo|Download|Netflix|Amazon|NF|AV1|ViSTA|V2|PROPER)\b'
     name = re.sub(unwanted, '', name, flags=re.IGNORECASE)
     name = re.sub(r'\b\d+(\.\d+)?\b(?=\s*$)', '', name)
@@ -234,17 +239,18 @@ async def clean_display_name(filename):
     name = re.sub(r'[._-]', ' ', name)
     return re.sub(r'\s{2,}', ' ', name).strip()
 
-async def get_formatted_language(text):
+async def get_formatted_language(filename, caption):
+    text = (filename + " " + (caption or "")).lower()
+    text = re.sub(r'[._\-\[\]\(\)]', ' ', text)
     found_langs = set()
-    text_lower = text.lower()
     for code, full_name in LANG_MAP.items():
-        if re.search(r'\b' + re.escape(code) + r'\b', text_lower):
+        if re.search(r'\b' + re.escape(code) + r'\b', text):
             found_langs.add(full_name)
     if not found_langs: return "Unknown"
     return ", ".join(sorted(found_langs))
 
 async def get_qualities(text):
-    quality_list = ["ORG", "HDCAM", "CAMRip", "WEB-DL", "HDRip", "HDTC", "HDTS", "HQ", "DVDscr", "DVDRip", "BluRay", "4K", "1080p"]
+    quality_list = ["ORG", "HDCAM", "CAMRip", "WEB-DL", "HDRip", "HDTC", "HDTS", "HQ", "DVDscr", "DVDRip", "BluRay", "WEBRip", "PreDVDRip"]
     text_lower = text.lower()
     for quality in quality_list:
         if quality.lower() in text_lower:
@@ -252,40 +258,21 @@ async def get_qualities(text):
     return None
 
 async def fetch_tmdb_data(query, year=None):
-    """
-    STRICT Verification Logic Added.
-    If query is 'Deva', result 'Devara' will be REJECTED.
-    """
     try:
         params = {"api_key": TMDB_API, "query": query}
         if year: params["year"] = year
         res = requests.get("https://api.themoviedb.org/3/search/movie", params=params, timeout=5)
         results = res.json().get("results", [])
-        
         if not results: return {}
         
-        # --- NEW VERIFICATION LOGIC ---
-        # We iterate through results to find a 'True' match
         matched_movie = None
-        
         for movie in results:
             title = movie.get("title", "")
-            
-            # Logic: The Query word must exist as a WHOLE WORD in the Result Title.
-            # Example: Query "Deva" -> Result "Devara" (No match for whole word 'Deva') -> REJECTED
-            # Example: Query "Iron Man" -> Result "Iron Man 3" -> ACCEPTED
-            
-            # Using Regex word boundary \b
             if re.search(r'\b' + re.escape(query) + r'\b', title, re.IGNORECASE):
                 matched_movie = movie
                 break
+        if not matched_movie: return {} 
         
-        # If no strict match found in results, return empty (don't show wrong poster)
-        if not matched_movie:
-            # Optional: If you want to be less strict, you can just return empty dict
-            # ensuring NO poster is sent if name doesn't match.
-            return {} 
-            
         movie_id = matched_movie.get("id")
         details_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API}", timeout=5)
         details = details_res.json()
@@ -312,3 +299,4 @@ async def fetch_tmdb_data(query, year=None):
 
 def generate_unique_id(movie_name):
     return hashlib.md5(movie_name.encode('utf-8')).hexdigest()[:5]
+    
