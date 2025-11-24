@@ -98,43 +98,56 @@ async def send_movie_update(bot, file_name, caption):
         
         language = await get_formatted_language(file_name, caption)
         quality = await get_qualities(caption)
+        
+        # Set Quality to "Unknown" if None
+        if not quality:
+            quality = "Unknown"
+
+        # ** UPDATE HERE: Set Language to "Not Sure" if Unknown **
+        if language == "Unknown":
+            language = "Not Sure"
 
         if unique_id not in reaction_counts:
             reaction_counts[unique_id] = {"❤️": 0, "👍": 0, "👎": 0, "🔥": 0}
             user_reactions[unique_id] = {}
 
-        # --- 4. DESIGN SECTION (DESIGN 1: CINEMATIC BOX) ---
+        # --- 4. NEW DESIGN SECTION (REQUESTED FORMAT) ---
         
-        # Header
-        full_caption = f"⚡️ <b>{title} ({tmdb_year})</b>\n\n"
+        # Top Border
+        full_caption = "#𝑵𝒆𝒘_𝑪𝒐𝒏𝒕𝒆𝒏𝒕_𝑨𝒅𝒅𝒆𝒅 💌\n\n╭─━━━⌁ 𝘾𝙊𝙉𝙏𝙀𝙉𝙏 𝙄𝙉𝙁𝙊 ⌁━━━─╮\n"
         
-        # Start Box
-        full_caption += "╭─❮ <b>ᴍᴏᴠɪᴇ ɪɴꜰᴏ</b> ❯───\n"
+        # Title
+        full_caption += f"│ 📂 𝐓𝐢𝐭𝐥𝐞: {title}\n"
         
-        # Box Content (Conditional)
+        # Genre (Conditional)
         if genres: 
-            full_caption += f"│ 🎭 <b>Genre:</b> {genres}\n"
-        if rating and str(rating) != "0" and str(rating) != "0.0":
-            full_caption += f"│ ⭐️ <b>Rating:</b> {rating}/10\n"
-        if quality:
-            full_caption += f"│ 💿 <b>Quality:</b> {quality}\n"
-        if language != "Unknown":
-            full_caption += f"│ 🔊 <b>Language:</b> {language}\n"
+            full_caption += f"│ 🎭 𝐆𝐞𝐧𝐫𝐞: {genres}\n"
             
-        # End Box
-        full_caption += "╰───────────────\n\n"
+        # Rating (Conditional)
+        if rating and str(rating) != "0" and str(rating) != "0.0":
+            full_caption += f"│ ⭐ 𝐑𝐚𝐭𝐢𝐧𝐠: {rating}/10\n"
+            
+        # Quality (Always shown)
+        full_caption += f"│ 💎 𝐐𝐮𝐚𝐥𝐢𝐭𝐲: {quality}\n"
         
-        # Storyline (Conditional)
+        # Audio (Always shown now due to modification)
+        full_caption += f"│ 🔊 𝐀𝐮𝐝𝐢𝐨: {language}\n"
+        
+        # Year (Conditional)
+        if tmdb_year and tmdb_year != "N/A":
+            full_caption += f"│ 📅 𝐘𝐞𝐚𝐫: {tmdb_year}\n"
+            
+        # Story (Conditional - Inside Box)
         if poster and overview and len(overview) > 10:
-            short_overview = overview[:250] + "..." if len(overview) > 250 else overview
-            full_caption += f"📝 <b>Storyline:</b>\n{short_overview}\n\n"
+            short_overview = overview[:200] + "..." if len(overview) > 200 else overview
+            full_caption += "│ 📝 𝐒𝐭𝐨𝐫𝐲:\n"
+            full_caption += f"│   {short_overview}\n"
         
-        # File Name
-        full_caption += f"📂 <b>File:</b> <code>{display_name}</code>\n"
+        # Bottom Border
+        full_caption += "╰━━━━━━━━━━━━━━━━━╯\n\n╭─━━━━⌁ ᴇɴɢᴀɢᴇ ᴡɪᴛʜ ᴘᴏꜱᴛ ⌁━━━━─╮\n┃ ♡ 𝐋𝐢𝐤𝐞  ❍ 𝐂𝐨𝐦𝐦𝐞𝐧𝐭  ⎙ 𝐒𝐚𝐯𝐞  ⌲ 𝐒𝐡𝐚𝐫𝐞\n╰━━━━━━━━━━━━━━━━━━━━━╯\n"
         
-        # Footer
-        full_caption += "━━━━━━━━━━━━━━━━━\n"
-        full_caption += "👇 <b>Get This File Below</b> 👇"
+        # CTA (Bold)
+        full_caption += "⬇️ <b>Get File Below</b> ⬇️"
 
         # --- 5. Buttons ---
         buttons = [[
@@ -299,4 +312,3 @@ async def fetch_tmdb_data(query, year=None):
 
 def generate_unique_id(movie_name):
     return hashlib.md5(movie_name.encode('utf-8')).hexdigest()[:5]
-    
