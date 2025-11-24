@@ -29,10 +29,10 @@ LANG_MAP = {
 }
 
 # Global Storage
-notified_movies = {} 
+notified_movies = {}
 user_reactions = {}
 reaction_counts = {}
-movie_slugs = {} 
+movie_slugs = {}
 
 media_filter = filters.document | filters.video | filters.audio
 
@@ -48,8 +48,8 @@ async def media(bot, message):
     media.file_type = file_type
     media.caption = message.caption
     success, silentxbotz = await save_file(bot, media)
-    try:  
-        if success and silentxbotz == 1 and await get_status(bot.me.id):            
+    try:
+        if success and silentxbotz == 1 and await get_status(bot.me.id):
             await send_movie_update(bot, file_name=media.file_name, caption=media.caption)
     except Exception as e:
         print(f"Error In Movie Update - {e}")
@@ -60,14 +60,14 @@ async def send_movie_update(bot, file_name, caption):
         # --- 1. Smart Link & 5-Day Check ---
         link_slug = await get_smart_link_slug(file_name)
         unique_id = generate_unique_id(link_slug)
-        
+
         current_time = datetime.now()
         if unique_id in notified_movies:
             last_posted_time = notified_movies[unique_id]
             if (current_time - last_posted_time) < timedelta(days=5):
                 print(f"Skipping update for {link_slug}: Posted recently.")
-                return 
-        
+                return
+
         notified_movies[unique_id] = current_time
         movie_slugs[unique_id] = link_slug
 
@@ -76,29 +76,36 @@ async def send_movie_update(bot, file_name, caption):
         clean_name = re.sub(r'https?://\S+|@\w+', '', clean_name)
         year_match = re.search(r"\b(19|20)\d{2}\b", clean_name)
         year = year_match.group(0) if year_match else None
-        
+
         if year:
-             search_query = clean_name[:clean_name.find(year)]
+            search_query = clean_name[:clean_name.find(year)]
         else:
-             search_query = clean_name
+            search_query = clean_name
 
         search_query = await clean_search_query(search_query)
 
         # --- 3. Fetch Data ---
         tmdb_data = await fetch_tmdb_data(search_query, year)
-        
+
         display_name = await clean_display_name(file_name)
-        
-        title = tmdb_data.get("title", display_name)
-        overview = tmdb_data.get("overview", "")
-        rating = tmdb_data.get("vote_average", 0)
+
+        # --- Title Logic: TMDB preferred, otherwise smart filename logic ---
+        tmdb_title = tmdb_data.get("title") if tmdb_data else None
+        title = None
+        if tmdb_title:
+            title = tmdb_title
+        else:
+            title = generate_title_from_filename(file_name)
+
+        overview = tmdb_data.get("overview", "") if tmdb_data else ""
+        rating = tmdb_data.get("vote_average", 0) if tmdb_data else 0
         genres = tmdb_data.get("genres", "")
-        poster = tmdb_data.get("poster")
-        tmdb_year = tmdb_data.get("release_date", year or "N/A")[:4]
-        
+        poster = tmdb_data.get("poster") if tmdb_data else None
+        tmdb_year = tmdb_data.get("release_date", year or "N/A")[:4] if tmdb_data else (year or "N/A")
+
         language = await get_formatted_language(file_name, caption)
         quality = await get_qualities(caption)
-        
+
         # Set Quality to "Unknown" if None
         if not quality:
             quality = "Unknown"
@@ -112,44 +119,61 @@ async def send_movie_update(bot, file_name, caption):
             user_reactions[unique_id] = {}
 
         # --- 4. NEW DESIGN SECTION (REQUESTED FORMAT) ---
-        
-        # Top Border
-        full_caption = "#𝑵𝒆𝒘_𝑪𝒐𝒏𝒕𝒆𝒏𝒕_𝑨𝒅𝒅𝒆𝒅 💌\n\n╭─━━━⌁ 𝘾𝙊𝙉𝙏𝙀𝙉𝙏 𝙄𝙉𝙁𝙊 ⌁━━━─╮\n"
-        
-        # Title
-        full_caption += f"│ 📂 𝐓𝐢𝐭𝐥𝐞: {title}\n"
-        
-        # Genre (Conditional)
-        if genres: 
-            full_caption += f"│ 🎭 𝐆𝐞𝐧𝐫𝐞: {genres}\n"
-            
-        # Rating (Conditional)
-        if rating and str(rating) != "0" and str(rating) != "0.0":
-            full_caption += f"│ ⭐ 𝐑𝐚𝐭𝐢𝐧𝐠: {rating}/10\n"
-            
-        # Quality (Always shown)
-        full_caption += f"│ 💎 𝐐𝐮𝐚𝐥𝐢𝐭𝐲: {quality}\n"
-        
-        # Audio (Always shown now due to modification)
-        full_caption += f"│ 🔊 𝐀𝐮𝐝𝐢𝐨: {language}\n"
-        
-        # Year (Conditional)
-        if tmdb_year and tmdb_year != "N/A":
-            full_caption += f"│ 📅 𝐘𝐞𝐚𝐫: {tmdb_year}\n"
-            
-        # Story (Conditional - Inside Box)
-        if poster and overview and len(overview) > 10:
-            short_overview = overview[:200] + "..." if len(overview) > 200 else overview
-            full_caption += "│ 📝 𝐒𝐭𝐨𝐫𝐲:\n"
-            full_caption += f"│   {short_overview}\n"
-        
-        # Bottom Border
-        full_caption += "╰━━━━━━━━━━━━━━━━━━━━━╯\n\n╭─━━━━⌁ ᴇɴɢᴀɢᴇ ᴡɪᴛʜ ᴘᴏꜱᴛ ⌁━━━━─╮\n┃ ♡ 𝐋𝐢𝐤𝐞  ❍ 𝐂𝐨𝐦𝐦𝐞𝐧𝐭  ⎙ 𝐒𝐚𝐯𝐞  ⌲ 𝐒𝐡𝐚𝐫𝐞\n╰━━━━━━━━━━━━━━━━━━━━━━━━━╯\n"
-        
-        # CTA (Bold)
-        full_caption += "⬇️ <b>Get File Below</b> ⬇️"
+        # Build caption parts carefully, story separated into its own box if present.
 
-        # --- 5. Buttons ---
+        # Top Border - Content Info
+        parts = []
+        parts.append("#𝑵𝒆𝒘_𝑪𝒐𝒏𝒕𝒆𝒏𝒕_𝑨𝒅𝒅𝒆𝒅 💌\n")
+        parts.append("╭─━━━⌁ 𝘾𝙊𝙉𝙏𝙀𝙉𝙏 𝙄𝙉𝙁𝙊 ⌁━━━─╮")
+        parts.append(f"│ 📂 𝐓𝐢𝐭𝐥𝐞: {title}")
+        if genres:
+            parts.append(f"│ 🎭 𝐆𝐞𝐧𝐫𝐞: {genres}")
+        if rating and str(rating) not in ("0", "0.0"):
+            parts.append(f"│ ⭐ 𝐑𝐚𝐭𝐢𝐧𝐠: {rating}/10")
+        parts.append(f"│ 💎 𝐐𝐮𝐚𝐥𝐢𝐭𝐲: {quality}")
+        parts.append(f"│ 🔊 𝐀𝐮𝐝𝐢𝐨: {language}")
+        if tmdb_year and tmdb_year != "N/A":
+            parts.append(f"│ 📅 𝐘𝐞𝐚𝐫: {tmdb_year}")
+        parts.append("╰━━━━━━━━━━━━━━━━━━━━━╯")
+
+        # Story Box: only if overview exists and has meaningful length
+        if overview and len(overview.strip()) > 10:
+            # keep a reasonable length but allow multi-line; shorten if extremely long
+            short_overview = overview.strip()
+            if len(short_overview) > 600:
+                short_overview = short_overview[:600].rsplit(" ", 1)[0] + "..."
+            # split overview into lines of ~70 chars for nicer appearance in telegram
+            overview_lines = []
+            max_line_len = 70
+            while short_overview:
+                if len(short_overview) <= max_line_len:
+                    overview_lines.append(short_overview)
+                    break
+                # break at last space before limit
+                cut = short_overview[:max_line_len].rfind(" ")
+                if cut == -1:
+                    cut = max_line_len
+                overview_lines.append(short_overview[:cut])
+                short_overview = short_overview[cut:].lstrip()
+            # add box
+            parts.append("\n╭─━━━⌁ 𝐒𝐓𝐎𝐑𝐘 𝐁𝐎𝐗 ⌁━━━─╮")
+            for ln in overview_lines:
+                parts.append(f"│ {ln}")
+            parts.append("╰━━━━━━━━━━━━━━━━━━━━━━╯")
+
+        # Engage box (unchanged style)
+        parts.append("\n╭─━━━━⌁ ᴇɴɢᴀɢᴇ ᴡɪᴛʜ ᴘᴏꜱᴛ ⌁━━━━─╮")
+        parts.append("┃ ♡ 𝐋𝐢𝐤𝐞  ❍ 𝐂𝐨𝐦𝐦𝐞𝐧𝐭  ⎙ 𝐒𝐚𝐯𝐞  ⌲ 𝐒𝐡𝐚𝐫𝐞")
+        parts.append("╰━━━━━━━━━━━━━━━━━━━━━━━━━╯")
+
+        # Centered "Get File Below" visual box — placed on its own to appear centered
+        parts.append("\n╭─────────────────────────╮")
+        parts.append("│    ⬇️ 𝗚𝗲𝘁 𝗙𝗶𝗹𝗲 𝗕𝗲𝗹𝗼𝘄    │")
+        parts.append("╰─────────────────────────╯")
+
+        full_caption = "\n".join(parts)
+
+        # --- 5. Buttons (reactions + single Get File button row kept as URL) ---
         buttons = [[
             InlineKeyboardButton(f"❤️ {reaction_counts[unique_id]['❤️']}", callback_data=f"r_{unique_id}_h"),
             InlineKeyboardButton(f"👍 {reaction_counts[unique_id]['👍']}", callback_data=f"r_{unique_id}_l"),
@@ -171,16 +195,16 @@ async def send_movie_update(bot, file_name, caption):
 async def reaction_handler(client, query):
     try:
         data = query.data.split("_")
-        if len(data) != 3: return        
-        
+        if len(data) != 3: return
+
         unique_id = data[1]
         short_code = data[2]
         user_id = query.from_user.id
-        
+
         code_map = {"h": "❤️", "l": "👍", "d": "👎", "f": "🔥"}
         if short_code not in code_map: return
         new_emoji = code_map[short_code]
-        
+
         link_slug = movie_slugs.get(unique_id)
         if not link_slug:
             await query.answer("Bot restarted, link expired.", show_alert=True)
@@ -194,13 +218,13 @@ async def reaction_handler(client, query):
             old_emoji = user_reactions[unique_id][user_id]
             if old_emoji == new_emoji:
                 await query.answer("You already reacted!", show_alert=False)
-                return 
+                return
             else:
                 reaction_counts[unique_id][old_emoji] -= 1
-        
+
         user_reactions[unique_id][user_id] = new_emoji
         reaction_counts[unique_id][new_emoji] += 1
-        
+
         updated_buttons = [[
             InlineKeyboardButton(f"❤️ {reaction_counts[unique_id]['❤️']}", callback_data=f"r_{unique_id}_h"),
             InlineKeyboardButton(f"👍 {reaction_counts[unique_id]['👍']}", callback_data=f"r_{unique_id}_l"),
@@ -277,28 +301,28 @@ async def fetch_tmdb_data(query, year=None):
         res = requests.get("https://api.themoviedb.org/3/search/movie", params=params, timeout=5)
         results = res.json().get("results", [])
         if not results: return {}
-        
+
         matched_movie = None
         for movie in results:
             title = movie.get("title", "")
             if re.search(r'\b' + re.escape(query) + r'\b', title, re.IGNORECASE):
                 matched_movie = movie
                 break
-        if not matched_movie: return {} 
-        
+        if not matched_movie: return {}
+
         movie_id = matched_movie.get("id")
         details_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API}", timeout=5)
         details = details_res.json()
-        
+
         poster_path = details.get("poster_path") or matched_movie.get("poster_path")
         backdrop_path = details.get("backdrop_path")
         image_url = None
         if poster_path: image_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
         elif backdrop_path: image_url = f"https://image.tmdb.org/t/p/w500{backdrop_path}"
-        
+
         genres_list = [g["name"] for g in details.get("genres", [])]
         genres_str = ", ".join(genres_list[:2])
-        
+
         return {
             "title": details.get("title"),
             "overview": details.get("overview"),
@@ -312,3 +336,38 @@ async def fetch_tmdb_data(query, year=None):
 
 def generate_unique_id(movie_name):
     return hashlib.md5(movie_name.encode('utf-8')).hexdigest()[:5]
+
+# -------------------------
+# New helper for title generation (implements requested "first 5 words -> check year" logic)
+# -------------------------
+def generate_title_from_filename(filename: str) -> str:
+    # cleanup similar to clean_display_name but keep words for parsing
+    name = re.sub(r'\.\w+$', '', filename)
+    name = re.sub(r'https?://\S+|@\w+', '', name)
+    name = re.sub(r'[\[\]\(\)\{\}]', ' ', name)
+    name = re.sub(r'[._\-]', ' ', name)
+    name = re.sub(r'\s+', ' ', name).strip()
+    if not name:
+        return filename
+
+    words = name.split()
+    # look at first 5 words for a year
+    first5 = words[:5]
+    year_index = None
+    for i, w in enumerate(first5):
+        if re.match(r'^(19|20)\d{2}$', w):
+            year_index = i
+            break
+
+    if year_index is not None:
+        # title is everything up to and including the year (as requested)
+        title_words = words[:year_index + 1]
+        title = " ".join(title_words)
+        return title
+
+    # if year not in first5, default to first 4 words + ellipsis if the filename had more words
+    first4 = words[:4]
+    title = " ".join(first4)
+    if len(words) > 4:
+        title = title + "…"
+    return title
