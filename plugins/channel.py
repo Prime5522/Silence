@@ -144,7 +144,7 @@ async def send_movie_update(bot, file_name, caption):
             full_caption += f"│   {short_overview}\n"
         
         # Bottom Border
-        full_caption += "╰━━━━━━━━━━━━━━━━━╯\n\n╭─━━━━⌁ ᴇɴɢᴀɢᴇ ᴡɪᴛʜ ᴘᴏꜱᴛ ⌁━━━━─╮\n┃ ♡ 𝐋𝐢𝐤𝐞  ❍ 𝐂𝐨𝐦𝐦𝐞𝐧𝐭  ⎙ 𝐒𝐚𝐯𝐞  ⌲ 𝐒𝐡𝐚𝐫𝐞\n╰━━━━━━━━━━━━━━━━━━━━━╯\n"
+        full_caption += "╰━━━━━━━━━━━━━━━━━━━━━╯\n\n╭─━━━━⌁ ᴇɴɢᴀɢᴇ ᴡɪᴛʜ ᴘᴏꜱᴛ ⌁━━━━─╮\n┃ ♡ 𝐋𝐢𝐤𝐞  ❍ 𝐂𝐨𝐦𝐦𝐞𝐧𝐭  ⎙ 𝐒𝐚𝐯𝐞  ⌲ 𝐒𝐡𝐚𝐫𝐞\n╰━━━━━━━━━━━━━━━━━━━━━━━━━╯\n"
         
         # CTA (Bold)
         full_caption += "⬇️ <b>Get File Below</b> ⬇️"
