@@ -10,7 +10,7 @@ from database.ia_filterdb import save_file
 from pyrogram.enums import ParseMode
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
-# 1. UPDATED FULL LANGUAGE MAP
+# 1. FULL LANGUAGE MAP
 LANG_MAP = {
     "hi": "Hindi", "hin": "Hindi", "hindi": "Hindi",
     "en": "English", "eng": "English", "english": "English",
@@ -38,169 +38,85 @@ movie_slugs = {}
 
 media_filter = filters.document | filters.video | filters.audio
 
-# ---------- Helper: more qualities ----------
-#QUALITY_LIST = [
-    #"Uncut", "Director's Cut", "Remastered", "ORG", "HDCAM", "CAMRip",
-    #"WEB-DL", "HDRip", "HDTC", "HDTS", "HQ", "DVDscr", "DVDRip", "BluRay",
-    #"WEBRip", "PreDVDRip", "TS", "SCR", "CAM", "HC"
-#]
-
+# ---------- Helper: Quality List ----------
 QUALITY_LIST = [
-    # Main qualities
-    "UNCUT", "UN CUT",
-    "DIRECTOR'S CUT", "DIRCUT", "DCUT",
-    "REMASTERED", "REMASTER",
-    "ORG", "ORIGINAL",
-
-    # CAM / TS class
-    "HDCAM", "HD CAM",
-    "CAMRIP", "CAM RIP",
-    "CAM",
-    "HDTC", "HD TC",
-    "HDTS", "HD TS",
-    "TS", "TELESYNC",
-    "TC", "TELECINE",
-
-    # WEB class
-    "WEB-DL", "WEBDL", "WEB DL", "WEB",
-    "WEB-RIP", "WEBRIP", "WEB RIP",
-
-    # HDRip class
-    "HDRIP", "HD RIP",
-
-    # DVDRip class
-    "DVDRIP", "DVD RIP", 
-    "DVDSCR", "DVD SCR", "DVDSCREEN",
+    "UNCUT", "UN CUT", "DIRECTOR'S CUT", "DIRCUT", "DCUT",
+    "REMASTERED", "REMASTER", "ORG", "ORIGINAL",
+    "HDCAM", "HD CAM", "CAMRIP", "CAM RIP", "CAM",
+    "HDTC", "HD TC", "HDTS", "HD TS", "TS", "TELESYNC",
+    "TC", "TELECINE", "WEB-DL", "WEBDL", "WEB DL", "WEB",
+    "WEB-RIP", "WEBRIP", "WEB RIP", "HDRIP", "HD RIP",
+    "DVDRIP", "DVD RIP", "DVDSCR", "DVD SCR", "DVDSCREEN",
     "PRE DVDRIP", "PREDVDRIP", "PRE DVD RIP",
-
-    # BluRay class
     "BLURAY", "BLU RAY", "BRRIP", "BDRIP",
-
-    # Screener class
-    "SCR", "SCREENER",
-
-    # HC class (Hardcoded)
-    "HC", "HARDSUB", "HC HDRIP",
-
-    # HQ class
-    "HQ", "HIGH QUALITY",
-
-    # Rip variations
-    "RIP", "RIPPED",
-
-    # Misc real world qualities
-    "4K", "UHD", "FHD",
-    "60FPS", "50FPS",
-
-    # Streaming service tags (Sometimes used as quality)
-    "NF", "NETFLIX",
-    "AMZN", "AMAZON",
-    "DSNP", "DISNEY",
-    "HMAX", "HBOMAX", "HBO",
-    "APLTV", "APPLE TV",
-    "HULU",
-
-    # Other miscellaneous
-    "LINE AUDiO", "MIC", "MIC DUB",
-    "HQ WEBDL", "HQ WEB-DL",
-    "HD",
-
-    # Broken fragments often seen
-    "DL",
-    "WEB",
-    "CAM",
-    "RIP",
-    "SCR",
-    "BR",
+    "SCR", "SCREENER", "HC", "HARDSUB", "HC HDRIP",
+    "HQ", "HIGH QUALITY", "RIP", "RIPPED",
+    "4K", "UHD", "FHD", "60FPS", "50FPS",
+    "NF", "NETFLIX", "AMZN", "AMAZON", "DSNP", "DISNEY",
+    "HMAX", "HBOMAX", "HBO", "APLTV", "APPLE TV", "HULU",
+    "LINE AUDiO", "MIC", "MIC DUB", "HQ WEBDL", "HQ WEB-DL", "HD",
+    "DL", "WEB", "CAM", "RIP", "SCR", "BR"
 ]
 
-# ---------- Helper: build boxed text ----------
+# ---------- Helper: Build Boxed Text ----------
 def build_box(title, lines, wrap_width=40, padding=2):
-    """
-    Build a box with a title and wrapped lines.
-    title: str like "CONTENT INFO" or "STORY BOX"
-    lines: list of strings (already plain text)
-    wrap_width: max characters inside box (per line)
-    padding: spaces left/right inside box
-    returns: string (multi-line) with box
-    """
     wrapped = []
     for line in lines:
-        # wrap each line separately to keep bullets/faces nicely
         wrapped_lines = textwrap.wrap(line, width=wrap_width) or [""]
         wrapped.extend(wrapped_lines)
 
-    # compute inner width from longest wrapped line and title
     max_line_len = max([len(l) for l in wrapped] + [len(title)]) 
     inner_width = min(max_line_len, wrap_width)
-    # ensure at least title length
     inner_width = max(inner_width, len(title))
-    # total width includes padding
     total_inner = inner_width + padding * 2
 
-    # construct top title border
     title_center = title.center(total_inner)
     top = "╭" + "─" * (total_inner + 2) + "╮\n"
-    # we add a title row
-    title_row = "│ " + title_center + " │\n"
-    divider = "├" + "─" * (total_inner + 2) + "┤\n"
+    if title:
+        title_row = "│ " + title_center + " │\n"
+        divider = "├" + "─" * (total_inner + 2) + "┤\n"
+        header = top + title_row + divider
+    else:
+        # If no title (like get file box), just top border
+        header = top
 
-    # content rows
     content = ""
     for l in wrapped:
-        # left pad and right pad
         padded = l.ljust(total_inner)
         content += "│ " + padded + " │\n"
 
     bottom = "╰" + "─" * (total_inner + 2) + "╯\n"
+    return header + content + bottom
 
-    # assemble: top + title + divider + content + bottom
-    box = top + title_row + divider + content + bottom
-    return box
-
-# ---------- Helper: smart title (your requested logic) ----------
+# ---------- Helper: Smart Title Logic ----------
 YEAR_RE = re.compile(r'^(19|20)\d{2}$')
 
 async def smart_title_from_filename(filename, tmdb_data=None):
-    """
-    Return the best title:
-    - If tmdb_data has title -> use it
-    - Else: use smart logic: take first 5 words, if any is a year then take from start through that year,
-      else take first 4 words and append ellipsis
-    """
-    # if TMDB provided a good title, use it
     if tmdb_data and tmdb_data.get("title"):
         return tmdb_data.get("title")
 
-    # clean filename (remove extension, urls, weird tokens)
     name = re.sub(r'\.\w+$', '', filename)
     name = re.sub(r'https?://\S+|@\w+', '', name)
-    # replace separators with space
     name = re.sub(r'[_\.\-]+', ' ', name)
-    # collapse multiple spaces
     name = re.sub(r'\s{2,}', ' ', name).strip()
     if not name:
-        return filename[:40]  # fallback
+        return filename[:40]
 
     words = name.split()
-    # check first five words for a year
     first5 = words[:5]
     for idx, w in enumerate(first5):
         if YEAR_RE.match(w):
-            # take from start up to this index inclusive
             selected = words[: idx + 1 ]
             res = " ".join(selected)
             return res
 
-    # no year in first five -> use first four words
     selected = words[:4]
     title = " ".join(selected)
-    # if original has more words, add ellipsis
     if len(words) > 4:
         title = title + "…"
     return title
 
-# ---------- Existing helpers (kept) ----------
+# ---------- Other Helpers ----------
 async def get_smart_link_slug(filename):
     clean = re.sub(r'\.\w+$', '', filename)
     clean = re.sub(r'https?://\S+|@\w+', '', clean)
@@ -228,16 +144,6 @@ async def clean_search_query(text):
     text = re.sub(junk, '', text, flags=re.IGNORECASE)
     return re.sub(r'\s{2,}', ' ', text).strip()
 
-async def clean_display_name(filename):
-    name = re.sub(r'\.\w+$', '', filename)
-    name = re.sub(r'https?://\S+|@\w+', '', name)
-    unwanted = r'\b(?:1080p|720p|480p|2160p|4k|5k|HEVC|WEB-DL|BluRay|HDRip|HDTC|HDTS|CAMRip|HDCAM|DVDRip|DVDScr|WEBRip|x264|x265|10bit|60fps|AAC|AAC5\.1|5\.1|Dual|Audio|Multi|Sub|ESub|Line|GB|MB|KB|Downlo|Download|Netflix|Amazon|NF|AV1|ViSTA|V2|PROPER|Uncut|Director\'s|Remastered|CAM|TS|SCR)\b'
-    name = re.sub(unwanted, '', name, flags=re.IGNORECASE)
-    name = re.sub(r'\b\d+(\.\d+)?\b(?=\s*$)', '', name)
-    name = re.sub(r'[\[\(\{\]\)\}]', '', name)
-    name = re.sub(r'[._-]', ' ', name)
-    return re.sub(r'\s{2,}', ' ', name).strip()
-
 async def get_formatted_language(filename, caption):
     text = (filename + " " + (caption or "")).lower()
     text = re.sub(r'[._\-\[\]\(\)]', ' ', text)
@@ -253,10 +159,8 @@ async def get_qualities(text):
     for quality in QUALITY_LIST:
         if quality.lower() in text_lower:
             return quality
-    # no known quality found
     return None
 
-# ---------- Fetch TMDB (kept but with small safety) ----------
 async def fetch_tmdb_data(query, year=None):
     try:
         params = {"api_key": TMDB_API, "query": query}
@@ -272,7 +176,7 @@ async def fetch_tmdb_data(query, year=None):
                 matched_movie = movie
                 break
         if not matched_movie:
-            matched_movie = results[0]  # fallback to first result
+            matched_movie = results[0]
 
         movie_id = matched_movie.get("id")
         details_res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API}", timeout=5)
@@ -301,10 +205,9 @@ async def fetch_tmdb_data(query, year=None):
 def generate_unique_id(movie_name):
     return hashlib.md5(movie_name.encode('utf-8')).hexdigest()[:8]
 
-# ---------- Main handlers ----------
+# ---------- Handlers ----------
 @Client.on_message(filters.chat(CHANNELS) & media_filter)
 async def media(bot, message):
-    """Media Handler"""
     for file_type in ("document", "video", "audio"):
         media = getattr(message, file_type, None)
         if media is not None:
@@ -367,10 +270,9 @@ async def reaction_handler(client, query):
     except Exception as e:
         print("Reaction error:", e)
 
-# ---------- Core: send_movie_update with new layout ----------
+# ---------- FIXED send_movie_update Function ----------
 async def send_movie_update(bot, file_name, caption):
     try:
-        # --- Smart Link & 5-Day Check ---
         link_slug = await get_smart_link_slug(file_name)
         unique_id = generate_unique_id(link_slug)
 
@@ -384,7 +286,7 @@ async def send_movie_update(bot, file_name, caption):
         notified_movies[unique_id] = current_time
         movie_slugs[unique_id] = link_slug
 
-        # --- Smart Search Query ---
+        # Smart Search Query
         clean_name = re.sub(r'\.\w+$', '', file_name)
         clean_name = re.sub(r'https?://\S+|@\w+', '', clean_name)
         year_match = re.search(r"\b(19|20)\d{2}\b", clean_name)
@@ -397,10 +299,8 @@ async def send_movie_update(bot, file_name, caption):
 
         search_query = await clean_search_query(search_query)
 
-        # --- Fetch Data ---
+        # Fetch Data
         tmdb_data = await fetch_tmdb_data(search_query, year)
-
-        # Use smart title logic
         title = await smart_title_from_filename(file_name, tmdb_data)
 
         overview = tmdb_data.get("overview", "")
@@ -412,19 +312,15 @@ async def send_movie_update(bot, file_name, caption):
         language = await get_formatted_language(file_name, caption)
         quality = await get_qualities(caption)
 
-        # Set defaults
-        if not quality:
-            quality = "Unknown"
-        if language == "Unknown":
-            language = "Not Sure"
+        if not quality: quality = "Unknown"
+        if language == "Unknown": language = "Not Sure"
 
         if unique_id not in reaction_counts:
             reaction_counts[unique_id] = {"❤️": 0, "👍": 0, "👎": 0, "🔥": 0}
             user_reactions[unique_id] = {}
 
-        # --- Build Content Info Box ---
+        # 1. Build Essential Boxes First
         content_lines = []
-        # Title (ensure it's short enough)
         content_lines.append(f"📂 Title: {title}")
         if genres:
             content_lines.append(f"🎭 Genre: {genres}")
@@ -435,41 +331,47 @@ async def send_movie_update(bot, file_name, caption):
         if tmdb_year and tmdb_year != "N/A":
             content_lines.append(f"📅 Year: {tmdb_year}")
 
-        # build content box (wrap width tuned for mobile)
         content_box = build_box("CONTENT INFO", content_lines, wrap_width=36, padding=2)
 
-        # --- Build Story Box (only if overview exists and meaningful) ---
-        story_box = ""
-        if overview and len(overview.strip()) > 10:
-            # clean overview a bit
-            overview = re.sub(r'\s+', ' ', overview).strip()
-            # break into paragraph-wrapped lines
-            story_lines = textwrap.wrap(overview, width=36)
-            story_box = build_box("STORY BOX", story_lines, wrap_width=36, padding=2)
-
-        # --- Engage Box (fixed small box) ---
         engage_lines = ["♡ Like   ◌ Comment   ⎙ Save   ➤ Share"]
         engage_box = build_box("ENGAGE WITH POST", engage_lines, wrap_width=36, padding=2)
 
-        # --- Centered Get File Text (not a button) ---
-        # We'll create a small single-row box and center the text inside
         getfile_text = "⬇️ Get File Below ⬇️"
         getfile_box = build_box("", [getfile_text], wrap_width=36, padding=2)
 
-        # --- Compose final caption ---
         top_header = "#𝑵𝒆𝒘_𝑪𝒐𝒏𝒕𝒆𝒏𝒕_𝑨𝒅𝒅𝒆𝒅 💌\n\n"
+
+        # Calculate space for story
+        # Telegram limit 1024. Reserve 100 for safety.
+        base_caption = top_header + content_box + "\n" + engage_box + "\n" + getfile_box
+        remaining_len = 1024 - len(base_caption) - 100
+
+        # 2. Build Story Box (Conditional)
+        story_box = ""
+        if overview and len(overview.strip()) > 10 and remaining_len > 50:
+            overview = re.sub(r'\s+', ' ', overview).strip()
+            
+            # Truncate text to fit
+            max_text_len = remaining_len - 100 
+            if max_text_len < 50: max_text_len = 50
+            
+            if len(overview) > max_text_len:
+                overview = overview[:max_text_len] + "..."
+            
+            story_lines = textwrap.wrap(overview, width=36)
+            story_box_candidate = build_box("STORY BOX", story_lines, wrap_width=36, padding=2)
+            
+            # Check length again
+            if len(base_caption) + len(story_box_candidate) + 5 < 1024:
+                story_box = story_box_candidate + "\n"
+
+        # 3. Final Assemble
         caption_text = top_header + content_box + "\n"
         if story_box:
-            caption_text += story_box + "\n"
+            caption_text += story_box
         caption_text += engage_box + "\n"
-        # add getfile box but user said don't want it boxed - if you prefer unboxed, change to plain centered line.
-        # However per your last message you didn't want Get File boxed; user said "বক্সের প্রয়োজন নেই" — so add as centered plain line below.
-        # We'll keep a minimal border around it for consistent look but small.
-        # If you want it without any box, change the next line to: caption_text += f"\n{getfile_text.center(40)}\n"
-        # But Telegram doesn't preserve spaces; so keep the small box approach for centering.
         caption_text += getfile_box
 
-        # --- Buttons (reaction + Get File button separately) ---
         buttons = [[
             InlineKeyboardButton(f"❤️ {reaction_counts[unique_id]['❤️']}", callback_data=f"r_{unique_id}_h"),
             InlineKeyboardButton(f"👍 {reaction_counts[unique_id]['👍']}", callback_data=f"r_{unique_id}_l"),
@@ -479,12 +381,15 @@ async def send_movie_update(bot, file_name, caption):
             InlineKeyboardButton('📂 Get File 📂', url=f'https://telegram.me/{temp.U_NAME}?start=getfile-{link_slug}')
         ]]
 
-        # --- Send: photo if poster available else text ---
         if poster:
+            # Failsafe for photo caption length
+            if len(caption_text) > 1024:
+                caption_text = caption_text.replace(story_box, "")
+            
             await bot.send_photo(chat_id=MOVIE_UPDATE_CHANNEL, photo=poster, caption=caption_text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=ParseMode.HTML)
         else:
-            # send as message (disable web preview)
             await bot.send_message(chat_id=MOVIE_UPDATE_CHANNEL, text=caption_text, reply_markup=InlineKeyboardMarkup(buttons), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
 
     except Exception as e:
         print(f"Error in send_movie_update: {e}")
+
