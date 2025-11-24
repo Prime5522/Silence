@@ -7,6 +7,7 @@ from info import *
 from utils import *
 from pyrogram import Client, filters
 from database.ia_filterdb import save_file
+from pyrogram.enums import ParseMode
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 # 1. UPDATED FULL LANGUAGE MAP
@@ -480,10 +481,10 @@ async def send_movie_update(bot, file_name, caption):
 
         # --- Send: photo if poster available else text ---
         if poster:
-            await bot.send_photo(chat_id=MOVIE_UPDATE_CHANNEL, photo=poster, caption=caption_text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode="HTML")
+            await bot.send_photo(chat_id=MOVIE_UPDATE_CHANNEL, photo=poster, caption=caption_text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=ParseMode.HTML)
         else:
             # send as message (disable web preview)
-            await bot.send_message(chat_id=MOVIE_UPDATE_CHANNEL, text=caption_text, reply_markup=InlineKeyboardMarkup(buttons), disable_web_page_preview=True, parse_mode="HTML")
+            await bot.send_message(chat_id=MOVIE_UPDATE_CHANNEL, text=caption_text, reply_markup=InlineKeyboardMarkup(buttons), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
 
     except Exception as e:
         print(f"Error in send_movie_update: {e}")
