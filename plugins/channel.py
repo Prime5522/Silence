@@ -38,10 +38,79 @@ movie_slugs = {}
 media_filter = filters.document | filters.video | filters.audio
 
 # ---------- Helper: more qualities ----------
+#QUALITY_LIST = [
+    #"Uncut", "Director's Cut", "Remastered", "ORG", "HDCAM", "CAMRip",
+    #"WEB-DL", "HDRip", "HDTC", "HDTS", "HQ", "DVDscr", "DVDRip", "BluRay",
+    #"WEBRip", "PreDVDRip", "TS", "SCR", "CAM", "HC"
+#]
+
 QUALITY_LIST = [
-    "Uncut", "Director's Cut", "Remastered", "ORG", "HDCAM", "CAMRip",
-    "WEB-DL", "HDRip", "HDTC", "HDTS", "HQ", "DVDscr", "DVDRip", "BluRay",
-    "WEBRip", "PreDVDRip", "TS", "SCR", "CAM", "HC"
+    # Main qualities
+    "UNCUT", "UN CUT",
+    "DIRECTOR'S CUT", "DIRCUT", "DCUT",
+    "REMASTERED", "REMASTER",
+    "ORG", "ORIGINAL",
+
+    # CAM / TS class
+    "HDCAM", "HD CAM",
+    "CAMRIP", "CAM RIP",
+    "CAM",
+    "HDTC", "HD TC",
+    "HDTS", "HD TS",
+    "TS", "TELESYNC",
+    "TC", "TELECINE",
+
+    # WEB class
+    "WEB-DL", "WEBDL", "WEB DL", "WEB",
+    "WEB-RIP", "WEBRIP", "WEB RIP",
+
+    # HDRip class
+    "HDRIP", "HD RIP",
+
+    # DVDRip class
+    "DVDRIP", "DVD RIP", 
+    "DVDSCR", "DVD SCR", "DVDSCREEN",
+    "PRE DVDRIP", "PREDVDRIP", "PRE DVD RIP",
+
+    # BluRay class
+    "BLURAY", "BLU RAY", "BRRIP", "BDRIP",
+
+    # Screener class
+    "SCR", "SCREENER",
+
+    # HC class (Hardcoded)
+    "HC", "HARDSUB", "HC HDRIP",
+
+    # HQ class
+    "HQ", "HIGH QUALITY",
+
+    # Rip variations
+    "RIP", "RIPPED",
+
+    # Misc real world qualities
+    "4K", "UHD", "FHD",
+    "60FPS", "50FPS",
+
+    # Streaming service tags (Sometimes used as quality)
+    "NF", "NETFLIX",
+    "AMZN", "AMAZON",
+    "DSNP", "DISNEY",
+    "HMAX", "HBOMAX", "HBO",
+    "APLTV", "APPLE TV",
+    "HULU",
+
+    # Other miscellaneous
+    "LINE AUDiO", "MIC", "MIC DUB",
+    "HQ WEBDL", "HQ WEB-DL",
+    "HD",
+
+    # Broken fragments often seen
+    "DL",
+    "WEB",
+    "CAM",
+    "RIP",
+    "SCR",
+    "BR",
 ]
 
 # ---------- Helper: build boxed text ----------
