@@ -269,11 +269,94 @@ async def get_formatted_language(filename, caption):
     return ", ".join(sorted(found_langs))
 
 async def get_qualities(text):
-    quality_list = ["ORG", "HDCAM", "CAMRip", "WEB-DL", "HDRip", "HDTC", "HDTS", "HQ", "DVDscr", "DVDRip", "BluRay", "WEBRip", "PreDVDRip"]
+    # Master map: all variants → one single standardized quality
+    QUALITY_MAP = {
+        "uncut": "UNCUT",
+        "un cut": "UNCUT",
+
+        "director's cut": "Director's Cut",
+        "dircut": "Director's Cut",
+        "dcut": "Director's Cut",
+
+        "remastered": "Remastered",
+        "remaster": "Remastered",
+
+        "org": "ORG",
+        "original": "ORG",
+
+        # CAM/TS class
+        "hdcam": "HDCAM",
+        "hd cam": "HDCAM",
+
+        "camrip": "CAMRip",
+        "cam rip": "CAMRip",
+
+        "cam": "CAM",
+
+        "hdtc": "HDTC",
+        "hd tc": "HDTC",
+
+        "hdts": "HDTS",
+        "hd ts": "HDTS",
+
+        "ts": "TS",
+        "telesync": "TS",
+
+        "tc": "TC",
+        "telecine": "TC",
+
+        # WEB class
+        "web-dl": "WEB-DL",
+        "webdl": "WEB-DL",
+        "web dl": "WEB-DL",
+
+        "web-rip": "WEBRip",
+        "webrip": "WEBRip",
+        "web rip": "WEBRip",
+        "web": "WEBRip",     # fallback
+
+        # HDRip
+        "hdrip": "HDRip",
+        "hd rip": "HDRip",
+
+        # DVD class
+        "dvdrip": "DVDRip",
+        "dvd rip": "DVDRip",
+
+        "dvdscr": "DVDscr",
+        "dvd scr": "DVDscr",
+        "dvdscreen": "DVDscr",
+
+        "predvdrip": "PreDVDRip",
+        "pre dvdrip": "PreDVDRip",
+        "pre dvd rip": "PreDVDRip",
+
+        # BluRay class
+        "bluray": "BluRay",
+        "blu ray": "BluRay",
+        "brrip": "BluRay",
+        "bdrip": "BluRay",
+
+        # Screener
+        "scr": "SCR",
+        "screener": "SCR",
+
+        # HQ class
+        "hq": "HQ",
+        "high quality": "HQ",
+
+        # HC
+        "hc": "HC",
+        "hardsub": "HC",
+    }
+
     text_lower = text.lower()
-    for quality in quality_list:
-        if quality.lower() in text_lower:
-            return quality
+
+    # Check each key and return first matched standard quality
+    for key, value in QUALITY_MAP.items():
+        if key in text_lower:
+            return value
+
     return None
 
 async def fetch_tmdb_data(query, year=None):
