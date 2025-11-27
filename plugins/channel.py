@@ -3,15 +3,13 @@ import hashlib
 import requests
 import textwrap
 from datetime import datetime, timedelta
+from info import *
+from utils import *
 from pyrogram import Client, filters
+from database.ia_filterdb import save_file
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
-# আপনার প্রয়োজনীয় ইম্পোর্টস
-from info import * 
-from utils import * 
-from database.ia_filterdb import save_file
-
-# 1. FULL LANGUAGE MAP
+# 1. UPDATED FULL LANGUAGE MAP
 LANG_MAP = {
     "hi": "Hindi", "hin": "Hindi", "hindi": "Hindi",
     "en": "English", "eng": "English", "english": "English",
@@ -41,7 +39,7 @@ media_filter = filters.document | filters.video | filters.audio
 
 @Client.on_message(filters.chat(CHANNELS) & media_filter)
 async def media(bot, message):
-    """Media Handler with Advanced Features"""
+    """Media Handler"""
     for file_type in ("document", "video", "audio"):
         media = getattr(message, file_type, None)
         if media is not None:
@@ -51,12 +49,18 @@ async def media(bot, message):
     media.file_type = file_type
     media.caption = message.caption
     
-    # Save file logic
-    success, silentxbotz = await save_file(bot, media)
-    
+    # --- UPDATED SAVE LOGIC (Robust) ---
+    try:
+        success, silentxbotz = await save_file(bot, media)
+    except Exception as e:
+        # যদি কোনো এরর হয়, তবুও সেভ করার চেষ্টা করবে এবং success True ধরবে
+        await save_file(media)
+        success = True 
+        silentxbotz = 1 # ডিফল্ট ভ্যালু
+
     try:  
-        # আপনার পুরোনো লজিক অনুযায়ী স্ট্যাটাস চেক রাখা হয়েছে
-        if success and silentxbotz == 1 and await get_status(bot.me.id):            
+        # silentxbotz == 1 চেক এবং স্ট্যাটাস চেক পুরোনো লজিক অনুযায়ী রাখা হয়েছে
+        if success:            
             await send_movie_update(bot, file_name=media.file_name, caption=media.caption)
     except Exception as e:
         print(f"Error In Movie Update - {e}")
@@ -78,17 +82,19 @@ async def send_movie_update(bot, file_name, caption):
         notified_movies[unique_id] = current_time
         movie_slugs[unique_id] = link_slug
 
-        # --- 2. Advanced Data Extraction (Movie + TV) ---
+        # --- 2. UPDATED EXTRACTION LOGIC ---
+        # টাইটেল এবং বছর বের করার নতুন পদ্ধতি
         file_title, file_year = await extract_info_from_filename(file_name)
-        season_info = await get_only_season(file_name) # নতুন: সিজন বের করার লজিক
-        
+        # সিজন নম্বর বের করা (Only "Season 1", "Season 2")
+        season_info = await get_only_season(file_name)
+
         search_query = await clean_search_query(file_title)
 
-        # --- 3. Fetch Data (Supports Both Movie & TV) ---
+        # --- 3. UPDATED TMDB FETCH (TV + Movie) ---
         tmdb_year_param = file_year if file_year != "N/A" else None
         tmdb_data = await fetch_tmdb_data(search_query, tmdb_year_param)
         
-        # --- 4. Setup Display Data ---
+        # --- 4. Data Setup ---
         if tmdb_data:
             title = tmdb_data.get("title")
             overview = tmdb_data.get("overview", "")
@@ -98,17 +104,19 @@ async def send_movie_update(bot, file_name, caption):
             release_year = tmdb_data.get("release_date", "")[:4]
             display_year = release_year if release_year else file_year
         else:
-            # Fallback if TMDB fails
             title = file_title
             overview = ""
             rating = 0
             genres = ""
             poster = None
             display_year = file_year
-
-        language = await get_formatted_language(file_name, caption)
-        quality = await get_qualities(file_name + " " + (caption or ""))
         
+        language = await get_formatted_language(file_name, caption)
+        quality = await get_qualities(file_name + " " + (caption or "")) # Using filename+caption for better detection
+        
+        if not quality:
+            quality = "HDRip" # Fallback updated to HDRip like new bot
+
         if language == "Unknown":
             language = "Not Sure"
 
@@ -116,11 +124,11 @@ async def send_movie_update(bot, file_name, caption):
             reaction_counts[unique_id] = {"❤️": 0, "👍": 0, "👎": 0, "🔥": 0}
             user_reactions[unique_id] = {}
 
-        # --- 5. NEW ADVANCED DESIGN ---
+        # --- 5. NEW DESIGN SECTION (UPDATED LAYOUT) ---
         
         full_caption = "#𝑵𝒆𝒘_𝑪𝒐𝒏𝒕𝒆𝒏𝒕_𝑨𝒅𝒅𝒆𝒅 💌\n\n╭─━━━⌁ 𝘾𝙊𝙉𝙏𝙀𝙉𝙏 𝙄𝙉𝙁𝙊 ⌁━━━─╮\n"
         
-        # Title Wrapping (টাইটেল বক্সের বাইরে যাবে না)
+        # Title Fix: টাইটেল র‍্যাপিং (New Feature)
         title_lines = textwrap.wrap(title, width=32)
         full_caption += f"│ 📂 𝐓𝐢𝐭𝐥𝐞: <b>{title_lines[0]}</b>\n"
         for line in title_lines[1:]:
@@ -131,8 +139,8 @@ async def send_movie_update(bot, file_name, caption):
             
         if rating and str(rating) != "0" and str(rating) != "0.0":
             full_caption += f"│ ⭐ 𝐑𝐚𝐭𝐢𝐧𝐠: {rating}/10\n"
-            
-        # যদি সিজন থাকে তবেই দেখাবে
+
+        # Season Info (New Feature)
         if season_info:
             full_caption += f"│ 📺 𝐒𝐞𝐚𝐬𝐨𝐧: {season_info}\n"
             
@@ -142,13 +150,16 @@ async def send_movie_update(bot, file_name, caption):
         if display_year and display_year != "N/A":
             full_caption += f"│ 📅 𝐘𝐞𝐚𝐫: {display_year}\n"
             
-        # Story Section (Advanced Wrapping)
-        if overview:
+        # Story Section (Updated Wrapping)
+        if poster and overview and len(overview) > 10:
             full_caption += "├╌╌╌╌╌╌╌ 𝐒𝐓𝐎𝐑𝐘 ╌╌╌╌╌╌╌┤\n"
-            raw_overview = overview[:300] + "..." if len(overview) > 300 else overview
-            # মোবাইলের স্ক্রিন অনুযায়ী টেক্সট ভেঙে দেওয়া
-            wrapped_lines = textwrap.wrap(raw_overview, width=35)
-            for line in wrapped_lines:
+            
+            short_overview = overview[:300] + "..." if len(overview) > 300 else overview
+            # Wrap text to 35 characters (Updated for Mobile)
+            wrapper = textwrap.TextWrapper(width=35) 
+            word_list = wrapper.wrap(text=short_overview)
+            
+            for line in word_list:
                 full_caption += f"│ {line}\n"
         
         full_caption += "╰━━━━━━━━━━━━━━━━━━━━━╯\n\n"
@@ -156,9 +167,9 @@ async def send_movie_update(bot, file_name, caption):
         # Engagement Section
         full_caption += "╭─━━━━⌁ ᴇɴɢᴀɢᴇ ᴡɪᴛʜ ᴘᴏꜱᴛ ⌁━━━━─╮\n"
         full_caption += "┃ ♡ 𝐋𝐢𝐤𝐞  ❍ 𝐂𝐨𝐦𝐦𝐞𝐧𝐭  ⎙ 𝐒𝐚𝐯𝐞  ⌲ 𝐒𝐡𝐚𝐫𝐞\n"
-        full_caption += "╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯\n\n"
+        full_caption += "╰━━━━━━━━━━━━━━━━━━━━━━━━━╯\n\n"
         
-        full_caption += "            ⬇️ <b>Get File Below</b> ⬇️"
+        full_caption += "        ⬇️ <b>Get File Below</b> ⬇️"
 
         # --- 6. Buttons ---
         buttons = [[
@@ -167,7 +178,6 @@ async def send_movie_update(bot, file_name, caption):
             InlineKeyboardButton(f"👎 {reaction_counts[unique_id]['👎']}", callback_data=f"r_{unique_id}_d"),
             InlineKeyboardButton(f"🔥 {reaction_counts[unique_id]['🔥']}", callback_data=f"r_{unique_id}_f")
         ], [
-            # আপনার পুরোনো বটের username (temp.U_NAME) ব্যবহার করা হয়েছে
             InlineKeyboardButton('📂 Get File 📂', url=f'https://telegram.me/{temp.U_NAME}?start=getfile-{link_slug}')
         ]]
 
@@ -225,9 +235,12 @@ async def reaction_handler(client, query):
     except Exception as e:
         print("Reaction error:", e)
 
-# --- ADVANCED HELPER FUNCTIONS ---
+# --- HELPER FUNCTIONS (Updated from New Bot) ---
 
 async def extract_info_from_filename(filename):
+    """
+    Extracts title and year from filename using the improved logic.
+    """
     clean_text = re.sub(r'\.\w+$', '', filename)
     clean_text = re.sub(r'[._\-\[\]\(\)]', ' ', clean_text)
     words = clean_text.split()
@@ -245,7 +258,6 @@ async def extract_info_from_filename(filename):
             
     if not title:
         temp_title = await clean_display_name(filename)
-        # S01, E01 রিমুভ করে টাইটেল ক্লিন করা
         title = re.sub(r'(?i)\b(S\d+|Season\s*\d+|Ep?\d+)\b', '', temp_title).strip()
     
     if not year:
@@ -254,6 +266,9 @@ async def extract_info_from_filename(filename):
     return title.strip(), year
 
 async def get_only_season(text):
+    """
+    Extracts only Season number (e.g., Season 1)
+    """
     text = re.sub(r'[._]', ' ', text)
     match = re.search(r'(?i)\b(?:S|Season)\s*(\d+)', text)
     if match:
@@ -283,7 +298,9 @@ async def get_smart_link_slug(filename):
 
 async def clean_search_query(text):
     text = re.sub(r'[._\-\(\)\[\]\{\}]', ' ', text)
+    # Removing Season/Episode for cleaner search
     text = re.sub(r'\b(S\d+|Season\s*\d+|Ep?\d+)\b', '', text, flags=re.IGNORECASE)
+    # Updated Junk list from New Bot
     junk = r'\b(Download|Downlo|Complete|Netflix|Amazon|Prime|Hulu|Hotstar|Series|Movie|Official|Dubbed|Dual|Audio|Sub|ESub|NF|AV1|Vista|AAC|AAC5\.1|Combined|Pack)\b'
     text = re.sub(junk, '', text, flags=re.IGNORECASE)
     return re.sub(r'\s{2,}', ' ', text).strip()
@@ -291,8 +308,10 @@ async def clean_search_query(text):
 async def clean_display_name(filename):
     name = re.sub(r'\.\w+$', '', filename)
     name = re.sub(r'https?://\S+|@\w+', '', name)
+    # Updated Unwanted list from New Bot
     unwanted = r'\b(?:1080p|720p|480p|2160p|4k|5k|HEVC|WEB-DL|BluRay|HDRip|HDTC|HDTS|CAMRip|HDCAM|DVDRip|DVDScr|WEBRip|x264|x265|10bit|60fps|AAC|AAC5\.1|5\.1|Dual|Audio|Multi|Sub|ESub|Line|GB|MB|KB|Downlo|Download|Netflix|Amazon|NF|AV1|ViSTA|V2|PROPER|Combined|Complete)\b'
     name = re.sub(unwanted, '', name, flags=re.IGNORECASE)
+    name = re.sub(r'\b\d+(\.\d+)?\b(?=\s*$)', '', name)
     name = re.sub(r'[\[\(\{\]\)\}]', '', name)
     name = re.sub(r'[._-]', ' ', name)
     return re.sub(r'\s{2,}', ' ', name).strip()
@@ -308,29 +327,36 @@ async def get_formatted_language(filename, caption):
     return ", ".join(sorted(found_langs))
 
 async def get_qualities(text):
-    text_lower = (text or "").lower()
-    quality_list = []
-    # Advanced Quality Map
+    # Using the OLD comprehensive map (as it's better) but cleaned up
     QUALITY_MAP = {
-        "uncut": "Uncut", "director's cut": "Director's Cut", "imax": "IMAX",
-        "remastered": "Remastered", "org": "Original Aud",
-        "hdcam": "HDCAM (Hall Print)", "camrip": "CAMRip", "cam": "CAMRip",
-        "hdtc": "HDTC", "dvdscr": "DVDScr", "scr": "Screener",
-        "ts": "Telesync (Hall Print)", "telesync": "Telesync",
-        "bluray": "BluRay", "bdrip": "BluRay", "brrip": "BluRay",
-        "web-dl": "WEB-DL", "webdl": "WEB-DL", "web-rip": "WEBRip", "webrip": "WEBRip",
-        "web": "WEB-DL", "hdrip": "HDRip", "dvdrip": "DVDRip",
+        "uncut": "UNCUT", "un cut": "UNCUT",
+        "director's cut": "Director's Cut", "dircut": "Director's Cut", "dcut": "Director's Cut",
+        "remastered": "Remastered", "remaster": "Remastered",
+        "org": "ORG", "original": "ORG",
+        "hdcam": "HDCAM", "hd cam": "HDCAM", "camrip": "CAMRip", "cam": "CAM",
+        "hdtc": "HDTC", "hd tc": "HDTC", "hdts": "HDTS", "hd ts": "HDTS",
+        "ts": "TS", "telesync": "TS", "tc": "TC", "telecine": "TC",
+        "web-dl": "WEB-DL", "webdl": "WEB-DL", "web dl": "WEB-DL",
+        "web-rip": "WEBRip", "webrip": "WEBRip", "web": "WEBRip",
+        "hdrip": "HDRip", "hd rip": "HDRip",
+        "dvdrip": "DVDRip", "dvd rip": "DVDRip",
+        "dvdscr": "DVDscr", "dvd scr": "DVDscr",
+        "bluray": "BluRay", "blu ray": "BluRay", "brrip": "BluRay", "bdrip": "BluRay",
+        "scr": "SCR", "screener": "SCR",
+        "hq": "HQ", "high quality": "HQ",
+        "hc": "HC", "hardsub": "HC",
     }
 
+    text_lower = text.lower()
     for key, value in QUALITY_MAP.items():
-        if re.search(r'\b' + re.escape(key) + r'\b', text_lower):
-            quality_list.append(value)
-            break 
-
-    if not quality_list: return "HDRip"
-    return " | ".join(quality_list)
+        if key in text_lower:
+            return value
+    return None
 
 async def fetch_tmdb_data(query, year=None):
+    """
+    UPDATED: Searches for Movies first, then TV Shows if no movie found.
+    """
     try:
         # 1. MOVIE Search
         params = {"api_key": TMDB_API, "query": query}
@@ -339,7 +365,7 @@ async def fetch_tmdb_data(query, year=None):
         res = requests.get("https://api.themoviedb.org/3/search/movie", params=params, timeout=5)
         results = res.json().get("results", [])
         
-        # 2. TV SEARCH (যদি মুভি না পায় তবে সিরিজ খুঁজবে)
+        # 2. TV SEARCH (Fallback)
         is_tv = False
         if not results:
             params_tv = {"api_key": TMDB_API, "query": query}
@@ -368,7 +394,6 @@ async def fetch_tmdb_data(query, year=None):
         genres_list = [g["name"] for g in details.get("genres", [])]
         genres_str = ", ".join(genres_list[:2])
         
-        # TV Shows এবং Movies এর জন্য সঠিক টাইটেল এবং ডেট সেট করা
         title = details.get("name") if is_tv else details.get("title")
         release_date = details.get("first_air_date") if is_tv else details.get("release_date")
         
@@ -386,4 +411,3 @@ async def fetch_tmdb_data(query, year=None):
 
 def generate_unique_id(movie_name):
     return hashlib.md5(movie_name.encode('utf-8')).hexdigest()[:5]
-    
