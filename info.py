@@ -59,7 +59,7 @@ OWNER_SUPP = environ.get('OWNER_SUPP', 'https://t.me/Prime_Support_Group')
 AUTH_CHANNEL = int(environ.get('AUTH_CHANNEL', '-1002276144264')) #fell back 0
 AUTH_REQ_CHANNEL = int(environ.get('AUTH_REQ_CHANNEL', '-1002276144264')) #same
 
-IS_VERIFY = is_enabled('IS_VERIFY', True)
+IS_VERIFY = is_enabled('IS_VERIFY', False)
 LOG_VR_CHANNEL = int(environ.get('LOG_VR_CHANNEL', '-1002196408894')) #Verification Channel Id 
 LOG_API_CHANNEL = int(environ.get('LOG_API_CHANNEL', '-1002196408894')) #If Anyone Set Your Bot In Any Group And Set Shortner In That Group Then In This Channel The All Details Come
 VERIFY_IMG = environ.get("VERIFY_IMG", "https://i.ibb.co/Qv8KXPML/photo-2025-04-20-06-27-44-7495278325967880200.jpg")
@@ -69,14 +69,14 @@ TUTORIAL_2 = environ.get("TUTORIAL_2", "https://t.me/Prime_Movie_Watch_Dawnload/
 TUTORIAL_3 = environ.get("TUTORIAL_3", "https://t.me/Prime_Movie_Watch_Dawnload/76")
 
 # Verification (Must Fill All Veriables. Else You Got Error
-SHORTENER_API = environ.get("SHORTENER_API", "")#"608fbfe60758ecdfcaf5a30f3a076ab2416a3031")
-SHORTENER_WEBSITE = environ.get("SHORTENER_WEBSITE", "")#"droplink.co")
+SHORTENER_API = environ.get("SHORTENER_API", "608fbfe60758ecdfcaf5a30f3a076ab2416a3031")
+SHORTENER_WEBSITE = environ.get("SHORTENER_WEBSITE", "droplink.co")
 
-SHORTENER_API2 = environ.get("SHORTENER_API2", "")#"608fbfe60758ecdfcaf5a30f3a076ab2416a3031")
-SHORTENER_WEBSITE2 = environ.get("SHORTENER_WEBSITE2", "")#"droplink.co")
+SHORTENER_API2 = environ.get("SHORTENER_API2", "608fbfe60758ecdfcaf5a30f3a076ab2416a3031")
+SHORTENER_WEBSITE2 = environ.get("SHORTENER_WEBSITE2", "droplink.co")
 
-SHORTENER_API3 = environ.get("SHORTENER_API3", "")#"608fbfe60758ecdfcaf5a30f3a076ab2416a3031")
-SHORTENER_WEBSITE3 = environ.get("SHORTENER_WEBSITE3", "")#"droplink.co")
+SHORTENER_API3 = environ.get("SHORTENER_API3", "608fbfe60758ecdfcaf5a30f3a076ab2416a3031")
+SHORTENER_WEBSITE3 = environ.get("SHORTENER_WEBSITE3", "droplink.co")
 
 
 TWO_VERIFY_GAP = int(environ.get('TWO_VERIFY_GAP', "43200"))
@@ -92,7 +92,7 @@ PORT = environ.get("PORT", "8080")
 MSG_ALRT = environ.get('MSG_ALRT', 'Pᴏᴡᴇʀᴇᴅ ʙʏ: @PʀɪᴍᴇXBᴏᴛs 💙')
 SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'https://t.me/Prime_Support_Group') #Support Chat Link with https://
 P_TTI_SHOW_OFF = is_enabled((environ.get('P_TTI_SHOW_OFF', "False")), False)
-IMDB = is_enabled((environ.get('IMDB', "True")), False)
+IMDB = is_enabled((environ.get('IMDB', "True")), True)
 AUTO_FFILTER = is_enabled((environ.get('AUTO_FFILTER', "True")), True)
 AUTO_DELETE = is_enabled((environ.get('AUTO_DELETE', "True")), True)
 DELETE_TIME = int(environ.get("DELETE_TIME", "900"))  
