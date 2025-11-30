@@ -24,12 +24,12 @@ from utils import *
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
-TIMEZONE = "Asia/Kolkata"
+TIMEZONE = "Asia/Dhaka"
 BATCH_FILES = {}
 
 #EXTRA_CHANNEL = -1002043502363
 #EXTRA_CHANNELP = -1002245813234
-#EXTRA_CHANNELQ = -1002323796637
+EXTRA_CHANNELQ = -1002323796637
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
@@ -45,7 +45,7 @@ async def start(client, message):
         if not verify_id_info or verify_id_info["verified"]:
             await message.reply("<b>ʟɪɴᴋ ᴇxᴘɪʀᴇᴅ ᴛʀʏ ᴀɢᴀɪɴ...</b>")
             return  
-        ist_timezone = pytz.timezone('Asia/Kolkata')
+        ist_timezone = pytz.timezone('Asia/Dhaka')
         if await db.user_verified(user_id):
             key = "third_time_verified"
         else:
@@ -228,7 +228,7 @@ async def start(client, message):
                 try:
                     chat_info = await client.get_chat(AUTH_REQ_CHANNEL)
                     invite = await client.create_chat_invite_link(AUTH_REQ_CHANNEL, creates_join_request=True)
-                    btn.append([InlineKeyboardButton(f"✇ ᴊᴏɪɴ {chat_info.title} ✇", url=invite.invite_link)])
+                    btn.append([InlineKeyboardButton(f"✇ ᴊᴏɪɴ ᴏᴜʀ ᴜᴘᴅᴀᴛᴇꜱ ᴄʜᴀɴɴᴇʟ 1 ✇", url=invite.invite_link)]) #{chat_info.title}
                 except ChatAdminRequired:
                     logger.error("Make sure Bot is admin in AUTH_REQ_CHANNEL")
                     return
@@ -253,14 +253,14 @@ async def start(client, message):
                 #logger.error("Make sure Bot is admin in EXTRA_CHANNELP")
                 #return
 
-        #if not await is_subscribed(client, message.from_user.id, EXTRA_CHANNELQ):
-            #try:
-                #chat_extra_q = await client.get_chat(EXTRA_CHANNELQ)
-                #invite_extra_q = await client.create_chat_invite_link(EXTRA_CHANNELQ)
-                #btn.append([InlineKeyboardButton(f"✇ ᴊᴏɪɴ {chat_extra_q.title} ✇", url=invite_extra_q.invite_link)])
-            #except ChatAdminRequired:
-                #logger.error("Make sure Bot is admin in EXTRA_CHANNELQ")
-                #return
+        if not await is_subscribed(client, message.from_user.id, EXTRA_CHANNELQ):
+            try:
+                chat_extra_q = await client.get_chat(EXTRA_CHANNELQ)
+                invite_extra_q = await client.create_chat_invite_link(EXTRA_CHANNELQ)
+                btn.append([InlineKeyboardButton(f"✇ ᴊᴏɪɴ ᴏᴜʀ ᴜᴘᴅᴀᴛᴇꜱ ᴄʜᴀɴɴᴇʟ 2 ✇", url=invite_extra_q.invite_link)]) #{chat_extra_q.title}
+            except ChatAdminRequired:
+                logger.error("Make sure Bot is admin in EXTRA_CHANNELQ")
+                return
 
         # ✅ Retry বাটন
         if btn and message.command[1] != "subscribe":
